@@ -1,0 +1,144 @@
+.page {
+  min-height: 100vh;
+  background: #ffffff;
+  font-family: var(--font-inter), Helvetica, Arial, sans-serif;
+  font-size: 17px;
+  line-height: 1.35;
+  color: rgba(0, 0, 0, 0.85);
+  padding-bottom: 40px;
+}
+
+.topBar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 40px 56px 0 40px;
+}
+
+.logo {
+  display: block;
+}
+
+.nav {
+  display: flex;
+  gap: 46px;
+  padding-top: 6px;
+}
+
+.navLink {
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.navLink:hover {
+  color: #0071ad;
+}
+
+.content {
+  max-width: 800px;
+  margin-left: clamp(24px, 10vw, 158px);
+  padding: 24px 24px 0 0;
+}
+
+.eyebrow {
+  color: #828282;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+}
+
+.title {
+  font-family: var(--font-averia), Georgia, serif;
+  font-weight: 400;
+  font-size: 52px;
+  line-height: 1.1;
+  color: #0071ad;
+  margin: 8px 0 20px;
+}
+
+.muted {
+  color: #828282;
+  margin: 0 0 14px;
+}
+
+.photo {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin: 28px 0 36px;
+}
+
+.question {
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.85);
+  margin: 30px 0 10px;
+}
+
+.sectionHead {
+  font-weight: 700;
+  color: #0071ad;
+  margin: 48px 0 12px;
+}
+
+.list {
+  color: #828282;
+  margin: 0 0 14px;
+  padding-left: 24px;
+}
+
+.list li {
+  margin: 2px 0;
+}
+
+.categoryName {
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.85);
+  margin: 26px 0 6px;
+}
+
+.subName {
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.85);
+  margin: 14px 0 4px;
+}
+
+.detail {
+  color: #828282;
+  margin: 0;
+}
+
+.season {
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.85);
+  margin: 22px 0 4px;
+}
+
+.contact {
+  color: #828282;
+  margin: 0 0 4px;
+}
+
+.contact a {
+  color: #828282;
+  text-decoration: underline;
+}
+
+.contact a:hover {
+  color: #0071ad;
+}
+
+.instaRow {
+  display: flex;
+  justify-content: flex-end;
+  padding: 70px 56px 0;
+}
+
+.instaRow a {
+  color: #828282;
+  display: flex;
+}
+
+.instaRow a:hover {
+  color: #0071ad;
+}
