@@ -1,0 +1,711 @@
+.page {
+  min-height: 100vh;
+  background: #ffffff;
+  font-family: var(--font-inter), Helvetica, Arial, sans-serif;
+  color: #1b1b1b;
+}
+
+/* ---- sticky reader bar ---- */
+
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(6px);
+  border-bottom: 0.5px solid #e5e0d5;
+}
+
+.progress {
+  height: 3px;
+  background: #f0ece2;
+}
+
+.progressFill {
+  height: 3px;
+  background: #e2622b;
+  width: 0;
+}
+
+.barRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 9px 20px;
+}
+
+.barLink {
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: #1b1b1b;
+  white-space: nowrap;
+}
+
+.barLink:hover {
+  color: #b4470f;
+}
+
+.barTitle {
+  font-family: var(--font-averia), Georgia, serif;
+  font-size: 15px;
+  color: #1b1b1b;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.barActions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.barButton {
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  color: #1b1b1b;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 2px;
+  font-family: inherit;
+}
+
+.barButton:hover {
+  color: #b4470f;
+}
+
+.pdfPill {
+  font-size: 12px;
+  color: #8a5a1f;
+  border: 0.5px solid #c9a86a;
+  border-radius: 999px;
+  padding: 3px 12px;
+  white-space: nowrap;
+}
+
+.pdfPill:hover {
+  background: #faf3e3;
+}
+
+/* ---- contents drawer ---- */
+
+.drawerBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: rgba(27, 27, 27, 0.35);
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 31;
+  width: min(360px, 90vw);
+  background: #ffffff;
+  border-left: 0.5px solid #e5e0d5;
+  padding: 20px 0;
+  overflow-y: auto;
+}
+
+.drawerHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px 12px;
+  border-bottom: 0.5px solid #eee9dd;
+}
+
+.drawerTitle {
+  font-family: var(--font-averia), Georgia, serif;
+  font-size: 18px;
+  color: #0071ad;
+}
+
+.drawerItem {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  border-bottom: 0.5px solid #f2eee4;
+  padding: 12px 20px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.drawerItem:hover {
+  background: #faf8f2;
+}
+
+.drawerItemActive {
+  background: #faf3e3;
+}
+
+.drawerItemTitle {
+  font-family: var(--font-averia), Georgia, serif;
+  font-size: 15px;
+  color: #0071ad;
+  display: block;
+}
+
+.drawerItemMeta {
+  font-size: 12px;
+  color: #828282;
+  display: block;
+  margin-top: 2px;
+}
+
+/* ---- cover hero ---- */
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  padding: 48px 24px 30px;
+}
+
+.heroCover {
+  width: min(420px, 78vw);
+  height: auto;
+  border-radius: 2px;
+  box-shadow: 0 6px 14px rgba(50, 35, 15, 0.16), 0 24px 40px -18px rgba(50, 35, 15, 0.4);
+}
+
+.heroLabel {
+  font-family: var(--font-averia), Georgia, serif;
+  font-size: 30px;
+  color: #0071ad;
+  text-align: center;
+}
+
+.heroIssueNo {
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: #828282;
+  text-transform: uppercase;
+}
+
+.scrollCue {
+  font-size: 13px;
+  color: #828282;
+  padding-bottom: 6px;
+}
+
+/* ---- entries ---- */
+
+/* The container is wide; each entry chooses its own measure, so verse and
+   side-by-side layouts can breathe without stretching ordinary prose. */
+.entries {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 10px 24px 40px;
+}
+
+.entry,
+.divider,
+.credits {
+  max-width: 680px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Poetry must never wrap: a poet's line breaks are the form, so an accidental
+   wrap invents a break they didn't write. Lines break only at the author's own
+   <br>; an unusually long one scrolls rather than folding. The wider column
+   means that almost never happens. */
+.poetry {
+  max-width: 960px;
+}
+
+.poetry .bodyHtml {
+  white-space: nowrap;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.poetry .bodyHtml :global(.row),
+.poetry .bodyHtml :global(.gallery) {
+  white-space: normal;
+}
+
+.entry {
+  padding-top: 34px;
+  scroll-margin-top: 70px;
+}
+
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  color: #828282;
+  text-transform: uppercase;
+  margin: 0 0 6px;
+}
+
+.entryTitle {
+  font-family: var(--font-averia), Georgia, serif;
+  font-weight: 400;
+  font-size: 34px;
+  line-height: 1.15;
+  color: #0071ad;
+  margin: 0 0 8px;
+}
+
+.byline {
+  font-size: 14px;
+  color: #e2622b;
+  margin: 0 0 26px;
+}
+
+.body {
+  font-family: var(--font-lora), Georgia, serif;
+  font-size: 18px;
+  line-height: 1.75;
+  color: #2a2a28;
+}
+
+.body p {
+  margin: 0 0 1.2em;
+  white-space: pre-line;
+}
+
+/* body_html carries the original line/stanza breaks as <br>, so normal
+   whitespace handling applies here — pre-line would double every break */
+.bodyHtml {
+  white-space: normal;
+}
+
+.bodyHtml p {
+  margin: 0 0 1.2em;
+  white-space: normal;
+}
+
+.bodyHtml :global(.align-right) {
+  text-align: right;
+}
+
+.bodyHtml :global(.align-center) {
+  text-align: center;
+}
+
+.bodyHtml a {
+  color: #0071ad;
+  text-decoration: underline;
+}
+
+/* Illustrations sit inline exactly where the author placed them.
+   Asymmetric margins are deliberate: a caption belongs to the image ABOVE it,
+   so the gap below an image is small and the gap before the next one is large.
+   Equal margins make each caption look like it could belong to either photo. */
+.bodyHtml img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 2.6em auto 0.7em;
+  border-radius: 2px;
+}
+
+.bodyHtml img:first-child {
+  margin-top: 0.4em;
+}
+
+/* Animation pieces: the video is the artwork */
+.bodyHtml video {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  margin: 2.6em auto 0.7em;
+  border-radius: 2px;
+  background: #000;
+}
+
+/* Side-by-side layout the author composed on Cargo's 12-column grid —
+   an essay column with a small photo beside it. */
+/* Columns share the row in the proportions the author chose (a 6/4 split stays
+   60/40). Flex-grow rather than fixed 12ths, because the spacer columns are
+   dropped and fixed spans would leave dead space at the right. */
+.bodyHtml :global(.row) {
+  display: flex;
+  gap: 0 24px;
+  align-items: flex-start;
+  margin: 0 0 1.2em;
+}
+
+.bodyHtml :global(.col) {
+  min-width: 0;
+  flex: 1 1 0;
+}
+
+.bodyHtml :global(.col) img,
+.bodyHtml :global(.col) :global(.gallery) img {
+  width: 100%;
+  margin: 0.3em 0 0.7em;
+  max-height: none;
+}
+
+.bodyHtml :global(.col[data-span="1"]) { flex-grow: 1; }
+.bodyHtml :global(.col[data-span="2"]) { flex-grow: 2; }
+.bodyHtml :global(.col[data-span="3"]) { flex-grow: 3; }
+.bodyHtml :global(.col[data-span="4"]) { flex-grow: 4; }
+.bodyHtml :global(.col[data-span="5"]) { flex-grow: 5; }
+.bodyHtml :global(.col[data-span="6"]) { flex-grow: 6; }
+.bodyHtml :global(.col[data-span="7"]) { flex-grow: 7; }
+.bodyHtml :global(.col[data-span="8"]) { flex-grow: 8; }
+.bodyHtml :global(.col[data-span="9"]) { flex-grow: 9; }
+.bodyHtml :global(.col[data-span="10"]) { flex-grow: 10; }
+.bodyHtml :global(.col[data-span="11"]) { flex-grow: 11; }
+.bodyHtml :global(.col[data-span="12"]) { flex-grow: 12; }
+
+/* stack the columns rather than squeezing them on small screens */
+@media (max-width: 640px) {
+  .bodyHtml :global(.row) {
+    display: block;
+  }
+}
+
+/* A slideshow the editors grouped: a swipeable strip, in place, one image at a
+   time. Pure CSS scroll-snap — no JS, server-renders as real images. */
+.bodyHtml :global(.gallery) {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  margin: 2.6em 0 0.7em;
+  padding-bottom: 10px;
+  scrollbar-width: thin;
+  overscroll-behavior-x: contain;
+}
+
+.bodyHtml :global(.gallery) img {
+  flex: 0 0 100%;
+  scroll-snap-align: center;
+  margin: 0;
+  object-fit: contain;
+  max-height: 76vh;
+}
+
+/* single-image "galleries" shouldn't look scrollable */
+.bodyHtml :global(.gallery[data-count="1"]) {
+  overflow-x: visible;
+  padding-bottom: 0;
+}
+
+/* YouTube/Vimeo pieces */
+.bodyHtml :global(.embed) {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  margin: 2.6em auto 0.7em;
+  background: #000;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+/* playlists are players, not video frames */
+.bodyHtml :global(.embed-audio) {
+  aspect-ratio: auto;
+  height: 352px;
+  background: transparent;
+  border-radius: 12px;
+}
+
+.bodyHtml :global(.embed) iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* "[Baobab Boy]" style figure labels */
+.bodyHtml em strong,
+.bodyHtml strong em {
+  font-style: italic;
+  font-weight: 500;
+}
+
+.bodyHtml :global(.align-center) img,
+.bodyHtml :global(.align-right) img {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.bodyHtml h1,
+.bodyHtml h2,
+.bodyHtml h3,
+.bodyHtml h4 {
+  font-family: var(--font-averia), Georgia, serif;
+  font-weight: 400;
+  font-size: 22px;
+  color: #1b1b1b;
+  margin: 1.4em 0 0.5em;
+}
+
+.bodyHtml blockquote {
+  margin: 1.2em 0;
+  padding-left: 18px;
+  border-left: 2px solid #e5e0d5;
+  color: #4a4a45;
+}
+
+.bodyHtml ul,
+.bodyHtml ol {
+  margin: 0 0 1.2em;
+  padding-left: 26px;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 40px 0 6px;
+}
+
+.dividerLine {
+  flex: 1;
+  border-top: 1px dashed #d8d3c8;
+}
+
+.dividerSquare {
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid #d8d3c8;
+  transform: rotate(8deg);
+}
+
+/* ---- slideshow ---- */
+
+.slideshow {
+  position: relative;
+  margin: 6px 0 10px;
+}
+
+.viewport {
+  overflow: hidden;
+  background: #f6f4ef;
+  border-radius: 4px;
+}
+
+.slides {
+  display: flex;
+}
+
+.slide {
+  flex: 0 0 100%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.slideImg {
+  width: 100%;
+  height: auto;
+  max-height: 74vh;
+  object-fit: contain;
+  display: block;
+}
+
+.navBtn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  border: 0.5px solid #d8d3c8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: #1b1b1b;
+}
+
+.navBtn:hover {
+  background: #ffffff;
+  border-color: #b4470f;
+  color: #b4470f;
+}
+
+.navPrev {
+  left: 10px;
+}
+
+.navNext {
+  right: 10px;
+}
+
+.counter {
+  position: absolute;
+  right: 12px;
+  bottom: 10px;
+  font-size: 12px;
+  color: #6b6250;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 999px;
+  padding: 2px 9px;
+}
+
+.dots {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #d8d3c8;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.dotActive {
+  background: #e2622b;
+}
+
+/* ---- credits + end matter ---- */
+
+.credits {
+  text-align: center;
+  padding: 10px 0 20px;
+}
+
+.creditsHead {
+  font-family: var(--font-averia), Georgia, serif;
+  font-size: 24px;
+  color: #0071ad;
+  margin: 0 0 18px;
+}
+
+.creditsBody {
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: #6b6b66;
+  white-space: pre-line;
+}
+
+.endCta {
+  text-align: center;
+  padding: 34px 24px 70px;
+}
+
+.endCtaText {
+  font-family: var(--font-averia), Georgia, serif;
+  font-size: 20px;
+  color: #1b1b1b;
+  margin: 0 0 16px;
+}
+
+.endCtaLinks {
+  display: flex;
+  gap: 26px;
+  justify-content: center;
+}
+
+.endCtaLink {
+  font-size: 14px;
+  color: #b4470f;
+  border-bottom: 1.5px solid #e2622b;
+  padding-bottom: 2px;
+}
+
+.endCtaLink:hover {
+  color: #e2622b;
+}
+
+/* ---- pdf spread viewer ---- */
+
+.pdfPage {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: #f2f0ec;
+  font-family: var(--font-inter), Helvetica, Arial, sans-serif;
+}
+
+.pdfBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 20px;
+  background: #ffffff;
+  border-bottom: 0.5px solid #e5e0d5;
+}
+
+.pdfStage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 22px;
+  position: relative;
+  touch-action: pan-y;
+}
+
+.pdfImg {
+  height: 100%;
+  width: auto;
+  max-width: 48%;
+  object-fit: contain;
+  box-shadow: 0 4px 10px rgba(50, 35, 15, 0.14), 0 18px 34px -16px rgba(50, 35, 15, 0.35);
+  background: #fff;
+}
+
+.pdfImgSingle {
+  max-width: 96%;
+}
+
+.pdfFooter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 10px 0 16px;
+}
+
+.pdfCounter {
+  font-size: 13px;
+  color: #6b6b66;
+  min-width: 70px;
+  text-align: center;
+}
+
+.pdfNavBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 0.5px solid #d8d3c8;
+  cursor: pointer;
+  font-size: 16px;
+  color: #1b1b1b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pdfNavBtn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.pdfNavBtn:not(:disabled):hover {
+  border-color: #b4470f;
+  color: #b4470f;
+}
