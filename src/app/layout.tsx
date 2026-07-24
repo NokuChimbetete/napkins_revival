@@ -56,7 +56,8 @@ export const metadata: Metadata = {
   description: "An art zine for Minervans by Minervans",
   other: {
     // opt out of Dark Reader — the site is art-directed around a fixed palette
-    "darkreader-lock": "",
+    // needs a non-empty value: Next.js drops `other` entries whose value is ""
+    "darkreader-lock": "true",
   },
 };
 
