@@ -31,6 +31,9 @@ export type NapkinLook = {
   /** position on the pannable 2D field, % of field size */
   fx: number;
   fy: number;
+  /** 0.5–1.0 multiplier on the velocity/mouse parallax (the reference
+   *  component rolls Math.random() here; we hash for stability) */
+  parallaxEase: number;
 };
 
 export type NapkinMeta = {
@@ -76,6 +79,7 @@ export function napkinLook(entry: Pick<Entry, "slug" | "napkin_variant" | "font_
     z: 1 + (fnv1a("z" + slug) % 24),
     fx: 0, // assigned after the deterministic shuffle (needs the pile index)
     fy: 0,
+    parallaxEase: Math.round((0.5 + roll("pe", slug) * 0.5) * 100) / 100,
   };
 }
 

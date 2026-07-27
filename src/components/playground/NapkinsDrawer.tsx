@@ -9,21 +9,39 @@ import { PieceModal } from "./PieceModal";
 import styles from "./playground.module.css";
 
 /**
- * The drawer is a wooden table you pan across in any direction — wheel, drag,
- * arrows — modelled on emmiwu.com/playground: one rigid field moved by a
- * lerp-smoothed translate3d with a long inertial tail, a plain mouse wheel
- * travelling diagonally (measured there at ~1.4:1 x:y), drag with thrown
- * momentum, and a dot cursor. Clicking a napkin sends a fixed-position clone
- * flying to the middle — rising, straightening, growing to modal height while
- * it flips — and the modal appears the instant the flip lands.
+ * The drawer is an infinite wooden table. The motion engine is a faithful
+ * port of the Framer "Infinite Canvas" component running (at its default
+ * props) on emmiwu.com/playground, extracted from its published source:
+ *
+ *   wheel:  target -= delta * 0.4 (both axes)
+ *   drag:   target = dragStart + (pointer - pointerStart) * 0.5, no throw —
+ *           the position lerp supplies the glide after release
+ *   frame:  current += (target - current) * 0.067          (ease "Snappy" .3)
+ *           smoothed velocity: deltaC += (delta - deltaC) * 0.04
+ *           smoothed mouse:    mouseC += (mouse - mouseC) * 0.04
+ *   item:   offset = 5 * deltaC * ease_i                    (velocity trail)
+ *                  + (mouseC - 0.5) * itemSize * 0.6        (cursor parallax)
+ *           with ease_i per item in 0.5–1.0 (hashed, not random, for
+ *           stability), and the hovered napkin's inner face counter-shifted
+ *           by (0.5 - mouseC) * ease_i * 20%
+ *   wrap:   torus — every napkin re-enters on the far side, no edges
+ *
+ * Clicking still flies a fixed-position clone up to modal size while it
+ * flips, then the modal appears instantly.
  */
 
 const FLIGHT_MS = 420;
-/** lerp factor per 60fps frame; ~1.5s tail like the reference site */
-const EASE = 0.085;
-/** pure-vertical mouse wheels travel diagonally (emmiwu ratio 1.4:1) */
-const WHEEL_DIAG_X = 0.82;
-const WHEEL_DIAG_Y = 0.58;
+const SCROLL_SPEED = 0.4;
+const DRAG_SPEED = 0.5;
+const EASE = 0.067; // je(0.3) in the source: 0..1 mapped onto 0.01..0.2
+const SMOOTH = 0.04;
+const PARALLAX_GENERAL = 1;
+const PARALLAX_CHILD = 1;
+/** must equal the CSS background-size of .wood */
+const WOOD_TILE = 512;
+
+/** field dimensions must match the CSS spot percentages' frame of reference */
+const FIELD = { desktop: { w: 5040, h: 4900 }, mobile: { w: 3480, h: 3450 } };
 
 const urlFor = (slug?: string | null) =>
   slug ? `/playground?piece=${encodeURIComponent(slug)}` : "/playground";
@@ -41,6 +59,20 @@ const modalBox = () => {
   return { w, h, cx: window.innerWidth / 2, cy: window.innerHeight / 2 };
 };
 
+/** place v on the torus window centred on the viewport */
+const wrapCoord = (v: number, size: number, view: number) =>
+  v - size * Math.floor((v - (view / 2 - size / 2)) / size);
+
+type ItemState = {
+  el: HTMLElement;
+  flipper: HTMLElement | null;
+  baseX: number;
+  baseY: number;
+  w: number;
+  h: number;
+  ease: number;
+};
+
 export function NapkinsDrawer({
   napkins,
   initialPiece,
@@ -55,131 +87,156 @@ export function NapkinsDrawer({
 
   const viewportRef = useRef<HTMLDivElement>(null);
   const fieldRef = useRef<HTMLDivElement>(null);
+  const woodRef = useRef<HTMLDivElement>(null);
   const dotRef = useRef<HTMLDivElement>(null);
 
   const cache = useRef<Map<string, PlaygroundPiece>>(
     new Map(initialPiece ? [[initialPiece.entry.slug, initialPiece]] : [])
   );
-  const pos = useRef({ x: 0, y: 0 });
+  // scroll state, exactly the reference component's shape
+  const cur = useRef({ x: 0, y: 0 });
   const target = useRef({ x: 0, y: 0 });
+  const last = useRef({ x: 0, y: 0 });
+  const deltaC = useRef({ x: 0, y: 0 });
+  const mouseT = useRef({ x: 0.5, y: 0.5 });
+  const mouseC = useRef({ x: 0.5, y: 0.5 });
+  const items = useRef<ItemState[]>([]);
+  const fieldSize = useRef(FIELD.desktop);
   const rafId = useRef(0);
   const drag = useRef<{
     id: number;
-    lastX: number;
-    lastY: number;
-    lastT: number;
-    vx: number;
-    vy: number;
+    startX: number;
+    startY: number;
+    scrollX: number;
+    scrollY: number;
     moved: number;
     captured: boolean;
   } | null>(null);
+  const hovered = useRef<ItemState | null>(null);
   const suppressClickUntil = useRef(0);
-  const trackpadUntil = useRef(0);
   const flightEl = useRef<HTMLDivElement | null>(null);
   const busy = useRef(false);
+  const paused = useRef(false);
 
   const lookOf = useCallback(
     (slug: string) => napkins.find((n) => n.slug === slug) ?? null,
     [napkins]
   );
 
-  // ---- pan engine -------------------------------------------------------
+  // ---- item metrics ------------------------------------------------------
 
-  const clampTarget = useCallback(() => {
+  const measure = useCallback(() => {
     const vp = viewportRef.current;
-    const field = fieldRef.current;
-    if (!vp || !field) return;
-    target.current.x = Math.min(Math.max(target.current.x, 0), Math.max(0, field.offsetWidth - vp.clientWidth));
-    target.current.y = Math.min(Math.max(target.current.y, 0), Math.max(0, field.offsetHeight - vp.clientHeight));
-  }, []);
-
-  const apply = useCallback(() => {
-    const field = fieldRef.current;
-    if (field) {
-      field.style.transform = `translate3d(${-pos.current.x}px, ${-pos.current.y}px, 0)`;
-    }
-  }, []);
-
-  const tick = useCallback(
-    function loop(last?: number) {
-      rafId.current = requestAnimationFrame((now) => {
-        const dt = last ? Math.min(now - last, 64) : 16.7;
-        // frame-rate–independent exponential approach
-        const k = 1 - Math.pow(1 - EASE, dt / 16.7);
-        pos.current.x += (target.current.x - pos.current.x) * k;
-        pos.current.y += (target.current.y - pos.current.y) * k;
-        apply();
-        const still =
-          Math.abs(target.current.x - pos.current.x) < 0.08 &&
-          Math.abs(target.current.y - pos.current.y) < 0.08 &&
-          !drag.current;
-        if (still) {
-          pos.current.x = target.current.x;
-          pos.current.y = target.current.y;
-          apply();
-          rafId.current = 0;
-        } else {
-          loop(now);
-        }
+    if (!vp) return;
+    fieldSize.current = window.matchMedia("(max-width: 700px)").matches
+      ? FIELD.mobile
+      : FIELD.desktop;
+    const list: ItemState[] = [];
+    for (const n of napkins) {
+      const el = napkinNode(n.slug);
+      if (!el) continue;
+      list.push({
+        el,
+        flipper: el.querySelector(`.${styles.flipper}`),
+        baseX: (n.look.fx / 100) * fieldSize.current.w,
+        baseY: (n.look.fy / 100) * fieldSize.current.h,
+        w: el.offsetWidth,
+        h: el.offsetHeight,
+        ease: n.look.parallaxEase,
       });
-    },
-    [apply]
-  );
-
-  const kick = useCallback(() => {
-    if (!rafId.current) tick();
-  }, [tick]);
-
-  const panBy = useCallback(
-    (dx: number, dy: number) => {
-      target.current.x += dx;
-      target.current.y += dy;
-      clampTarget();
-      kick();
-    },
-    [clampTarget, kick]
-  );
-
-  const centerOn = useCallback(
-    (slug: string, instant = false) => {
-      const vp = viewportRef.current;
-      const field = fieldRef.current;
-      const n = lookOf(slug);
-      if (!vp || !field || !n) return;
-      target.current.x = (n.look.fx / 100) * field.offsetWidth - vp.clientWidth / 2;
-      target.current.y = (n.look.fy / 100) * field.offsetHeight - vp.clientHeight / 2;
-      clampTarget();
-      if (instant) {
-        pos.current.x = target.current.x;
-        pos.current.y = target.current.y;
-        apply();
-      } else {
-        kick();
-      }
-    },
-    [lookOf, clampTarget, apply, kick]
-  );
-
-  // initial position before first paint: deep-linked napkin or field centre
-  useLayoutEffect(() => {
-    const vp = viewportRef.current;
-    const field = fieldRef.current;
-    if (!vp || !field) return;
-    if (initialPiece) {
-      centerOn(initialPiece.entry.slug, true);
-    } else {
-      target.current.x = (field.offsetWidth - vp.clientWidth) / 2;
-      target.current.y = (field.offsetHeight - vp.clientHeight) / 2;
-      clampTarget();
-      pos.current.x = target.current.x;
-      pos.current.y = target.current.y;
-      apply();
     }
+    items.current = list;
+  }, [napkins]);
+
+  // ---- the frame, ported verbatim ---------------------------------------
+
+  const frame = useCallback(() => {
+    const reduced = prefersReducedMotion();
+    const k = reduced ? 1 : EASE;
+    cur.current.x += (target.current.x - cur.current.x) * k;
+    cur.current.y += (target.current.y - cur.current.y) * k;
+    deltaC.current.x += (cur.current.x - last.current.x - deltaC.current.x) * SMOOTH;
+    deltaC.current.y += (cur.current.y - last.current.y - deltaC.current.y) * SMOOTH;
+    mouseC.current.x += (mouseT.current.x - mouseC.current.x) * SMOOTH;
+    mouseC.current.y += (mouseT.current.y - mouseC.current.y) * SMOOTH;
+    last.current.x = cur.current.x;
+    last.current.y = cur.current.y;
+
+    const { w: W, h: H } = fieldSize.current;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const general = reduced ? 0 : PARALLAX_GENERAL;
+
+    /* eslint-disable react-hooks/immutability -- imperative rAF loop: writing
+       DOM styles through ref-held elements is the mechanism, not a mutation of
+       React state */
+    for (const it of items.current) {
+      const vx = 5 * deltaC.current.x * it.ease * general + (mouseC.current.x - 0.5) * it.w * 0.6 * general;
+      const vy = 5 * deltaC.current.y * it.ease * general + (mouseC.current.y - 0.5) * it.h * 0.6 * general;
+      const tx = wrapCoord(it.baseX + cur.current.x, W, vw) - it.baseX + vx;
+      const ty = wrapCoord(it.baseY + cur.current.y, H, vh) - it.baseY + vy;
+      it.el.style.transform = `translate(-50%, -50%) translate3d(${tx}px, ${ty}px, 0)`;
+      if (it.flipper) {
+        if (hovered.current === it && !reduced) {
+          const sx = (0.5 - mouseC.current.x) * it.ease * 20 * PARALLAX_CHILD;
+          const sy = (0.5 - mouseC.current.y) * it.ease * 20 * PARALLAX_CHILD;
+          it.flipper.style.transform = `translate(${sx}%, ${sy}%)`;
+        } else if (it.flipper.style.transform) {
+          it.flipper.style.transform = "";
+        }
+      }
+    }
+
+    const wood = woodRef.current;
+    if (wood) {
+      const wx = ((cur.current.x % WOOD_TILE) + WOOD_TILE) % WOOD_TILE;
+      const wy = ((cur.current.y % WOOD_TILE) + WOOD_TILE) % WOOD_TILE;
+      wood.style.transform = `translate3d(${wx}px, ${wy}px, 0)`;
+    }
+    /* eslint-enable react-hooks/immutability */
+  }, []);
+
+  // the loop runs continuously, like the reference component — the work is
+  // ~110 transform strings; it pauses only while the modal is open
+  useEffect(() => {
+    const loop = () => {
+      if (!paused.current) frame();
+      rafId.current = requestAnimationFrame(loop);
+    };
+    rafId.current = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(rafId.current);
+  }, [frame]);
+
+  useLayoutEffect(() => {
+    measure();
+    if (initialPiece) {
+      const meta = lookOf(initialPiece.entry.slug);
+      if (meta) {
+        target.current.x = window.innerWidth / 2 - (meta.look.fx / 100) * fieldSize.current.w;
+        target.current.y = window.innerHeight / 2 - (meta.look.fy / 100) * fieldSize.current.h;
+        cur.current.x = last.current.x = target.current.x;
+        cur.current.y = last.current.y = target.current.y;
+      }
+    }
+    frame();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // wheel: trackpads pan 1:1 on both axes; a plain vertical mouse wheel is
-  // sent along the reference site's diagonal so mice explore sideways too
+  useEffect(() => {
+    let t: ReturnType<typeof setTimeout> | null = null;
+    const onResize = () => {
+      if (t) clearTimeout(t);
+      t = setTimeout(measure, 120);
+    };
+    window.addEventListener("resize", onResize);
+    return () => {
+      if (t) clearTimeout(t);
+      window.removeEventListener("resize", onResize);
+    };
+  }, [measure]);
+
+  // ---- input, mapped 1:1 to the reference -------------------------------
+
   useEffect(() => {
     const vp = viewportRef.current;
     if (!vp) return;
@@ -187,22 +244,14 @@ export function NapkinsDrawer({
       if (busy.current || openPiece) return;
       e.preventDefault();
       const scale = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? vp.clientHeight : 1;
-      const dx = e.deltaX * scale;
-      const dy = e.deltaY * scale;
-      const now = performance.now();
-      if (Math.abs(dx) > 0.5) trackpadUntil.current = now + 900;
+      target.current.x -= e.deltaX * scale * SCROLL_SPEED;
+      target.current.y -= e.deltaY * scale * SCROLL_SPEED;
       setHintGone(true);
-      if (now < trackpadUntil.current) {
-        panBy(dx, dy);
-      } else {
-        panBy(dy * WHEEL_DIAG_X, dy * WHEEL_DIAG_Y);
-      }
     };
     vp.addEventListener("wheel", onWheel, { passive: false });
     return () => vp.removeEventListener("wheel", onWheel);
-  }, [panBy, openPiece]);
+  }, [openPiece]);
 
-  // drag to pan (mouse + touch), with thrown momentum on release
   useEffect(() => {
     const vp = viewportRef.current;
     if (!vp) return;
@@ -210,23 +259,22 @@ export function NapkinsDrawer({
     const onDown = (e: PointerEvent) => {
       if (busy.current || openPiece || !e.isPrimary) return;
       if (e.pointerType === "mouse" && e.button !== 0) return;
-      drag.current = { id: e.pointerId, lastX: e.clientX, lastY: e.clientY, lastT: performance.now(), vx: 0, vy: 0, moved: 0, captured: false };
-      kick();
+      drag.current = {
+        id: e.pointerId,
+        startX: e.clientX,
+        startY: e.clientY,
+        scrollX: target.current.x,
+        scrollY: target.current.y,
+        moved: 0,
+        captured: false,
+      };
     };
     const onMove = (e: PointerEvent) => {
       const d = drag.current;
       if (!d || e.pointerId !== d.id) return;
-      const now = performance.now();
-      const dx = e.clientX - d.lastX;
-      const dy = e.clientY - d.lastY;
-      const dt = Math.max(now - d.lastT, 1);
-      // smoothed velocity for the throw
-      d.vx = 0.8 * d.vx + 0.2 * (dx / dt) * 1000;
-      d.vy = 0.8 * d.vy + 0.2 * (dy / dt) * 1000;
-      d.moved += Math.hypot(dx, dy);
-      d.lastX = e.clientX;
-      d.lastY = e.clientY;
-      d.lastT = now;
+      const dx = e.clientX - d.startX;
+      const dy = e.clientY - d.startY;
+      d.moved = Math.max(d.moved, Math.hypot(dx, dy));
       // capture only once it's clearly a drag — capturing on pointerdown
       // would retarget pointerup to the viewport and swallow napkin clicks
       if (!d.captured && d.moved > 4) {
@@ -236,25 +284,15 @@ export function NapkinsDrawer({
         setHintGone(true);
       }
       if (!d.captured) return;
-      // dragging pins the field to the pointer; lerp adds the cushion
-      target.current.x -= dx;
-      target.current.y -= dy;
-      clampTarget();
-      kick();
+      target.current.x = d.scrollX + dx * DRAG_SPEED;
+      target.current.y = d.scrollY + dy * DRAG_SPEED;
     };
     const onUp = (e: PointerEvent) => {
       const d = drag.current;
       if (!d || e.pointerId !== d.id) return;
-      if (d.moved > 8) {
-        suppressClickUntil.current = performance.now() + 300;
-        // project the throw ~260ms ahead; the lerp eases it to rest
-        target.current.x -= d.vx * 0.26;
-        target.current.y -= d.vy * 0.26;
-        clampTarget();
-      }
+      if (d.moved > 8) suppressClickUntil.current = performance.now() + 300;
       drag.current = null;
       vp.classList.remove(styles.grabbing);
-      kick();
     };
 
     vp.addEventListener("pointerdown", onDown);
@@ -267,31 +305,66 @@ export function NapkinsDrawer({
       vp.removeEventListener("pointerup", onUp);
       vp.removeEventListener("pointercancel", onUp);
     };
-  }, [clampTarget, kick, openPiece]);
+  }, [openPiece]);
 
-  // arrow keys pan; tabbing to a napkin brings it into view
+  // dot cursor + the normalized mouse the parallax feeds on
+  useEffect(() => {
+    const vp = viewportRef.current;
+    const dot = dotRef.current;
+    if (!vp || !dot) return;
+    const onMove = (e: PointerEvent) => {
+      mouseT.current.x = e.clientX / window.innerWidth;
+      mouseT.current.y = e.clientY / window.innerHeight;
+      dot.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0) translate(-50%, -50%)`;
+      const t = e.target as HTMLElement;
+      dot.style.opacity = vp.contains(t) ? "1" : "0";
+      const spot = t.closest?.("[data-napkin-slug]") as HTMLElement | null;
+      dot.classList.toggle(styles.dotBig, Boolean(spot));
+      hovered.current = spot ? (items.current.find((i) => i.el === spot) ?? null) : null;
+    };
+    window.addEventListener("pointermove", onMove, { passive: true });
+    return () => window.removeEventListener("pointermove", onMove);
+  }, []);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (openPiece || busy.current) return;
       const step = e.shiftKey ? 480 : 180;
       const map: Record<string, [number, number]> = {
-        ArrowLeft: [-step, 0],
-        ArrowRight: [step, 0],
-        ArrowUp: [0, -step],
-        ArrowDown: [0, step],
-        PageUp: [0, -window.innerHeight * 0.8],
-        PageDown: [0, window.innerHeight * 0.8],
+        ArrowLeft: [step, 0],
+        ArrowRight: [-step, 0],
+        ArrowUp: [0, step],
+        ArrowDown: [0, -step],
+        PageUp: [0, window.innerHeight * 0.8],
+        PageDown: [0, -window.innerHeight * 0.8],
       };
       const d = map[e.key];
       if (d) {
         e.preventDefault();
         setHintGone(true);
-        panBy(d[0], d[1]);
+        target.current.x += d[0];
+        target.current.y += d[1];
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [panBy, openPiece]);
+  }, [openPiece]);
+
+  const centerOn = useCallback(
+    (slug: string) => {
+      const meta = lookOf(slug);
+      if (!meta) return;
+      const { w: W, h: H } = fieldSize.current;
+      let tx = window.innerWidth / 2 - (meta.look.fx / 100) * W;
+      let ty = window.innerHeight / 2 - (meta.look.fy / 100) * H;
+      // travel to the nearest wrap of the napkin, not across the whole table
+      tx += W * Math.round((target.current.x - tx) / W);
+      ty += H * Math.round((target.current.y - ty) / H);
+      target.current.x = tx;
+      target.current.y = ty;
+    },
+    [lookOf]
+  );
 
   useEffect(() => {
     const vp = viewportRef.current;
@@ -303,31 +376,6 @@ export function NapkinsDrawer({
     vp.addEventListener("focusin", onFocus);
     return () => vp.removeEventListener("focusin", onFocus);
   }, [centerOn, openPiece]);
-
-  useEffect(() => {
-    const onResize = () => {
-      clampTarget();
-      kick();
-    };
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, [clampTarget, kick]);
-
-  // dot cursor: tracks at window level, grows over napkins, yields to the
-  // real cursor over the fixed chrome (which isn't inside the viewport)
-  useEffect(() => {
-    const vp = viewportRef.current;
-    const dot = dotRef.current;
-    if (!vp || !dot) return;
-    const onMove = (e: PointerEvent) => {
-      dot.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0) translate(-50%, -50%)`;
-      const t = e.target as HTMLElement;
-      dot.style.opacity = vp.contains(t) ? "1" : "0";
-      dot.classList.toggle(styles.dotBig, Boolean(t.closest?.("[data-napkin-slug]")));
-    };
-    window.addEventListener("pointermove", onMove, { passive: true });
-    return () => window.removeEventListener("pointermove", onMove);
-  }, []);
 
   // ---- open / close with the flight ------------------------------------
 
@@ -342,45 +390,49 @@ export function NapkinsDrawer({
   }, []);
 
   /** fixed-position copy of the napkin that can fly above the panning field */
-  const buildFlight = useCallback((slug: string) => {
-    const spot = napkinNode(slug);
-    const inner = spot?.querySelector<HTMLElement>(`.${styles.napkin}`);
-    const meta = lookOf(slug);
-    if (!spot || !inner || !meta) return null;
-    const r = inner.getBoundingClientRect();
-    const w = inner.offsetWidth;
-    const h = inner.offsetHeight;
-    const holder = document.createElement("div");
-    holder.className = styles.flight;
-    // the safe-area and type-size rules key off these attributes
-    holder.dataset.variant = String(meta.look.variant);
-    holder.dataset.size = String(meta.look.size);
-    holder.style.width = `${w}px`;
-    holder.style.height = `${h}px`;
-    holder.style.left = `${r.left + r.width / 2}px`;
-    holder.style.top = `${r.top + r.height / 2}px`;
-    const flipper = inner.querySelector(`.${styles.flipper}`)!.cloneNode(true) as HTMLElement;
-    flipper.style.fontFamily = NAPKIN_FONTS[meta.look.fontPreset - 1].family;
-    holder.appendChild(flipper);
-    document.body.appendChild(holder);
-    const box = modalBox();
-    const scale = Math.min(box.w / w, box.h / h);
-    return {
-      holder,
-      flipper,
-      tilt: meta.look.tilt,
-      dx: box.cx - (r.left + r.width / 2),
-      dy: box.cy - (r.top + r.height / 2),
-      scale,
-      spot,
-    };
-  }, [lookOf]);
+  const buildFlight = useCallback(
+    (slug: string) => {
+      const spot = napkinNode(slug);
+      const inner = spot?.querySelector<HTMLElement>(`.${styles.napkin}`);
+      const meta = lookOf(slug);
+      if (!spot || !inner || !meta) return null;
+      const r = inner.getBoundingClientRect();
+      const w = inner.offsetWidth;
+      const h = inner.offsetHeight;
+      const holder = document.createElement("div");
+      holder.className = styles.flight;
+      // the safe-area and type-size rules key off these attributes
+      holder.dataset.variant = String(meta.look.variant);
+      holder.dataset.size = String(meta.look.size);
+      holder.style.width = `${w}px`;
+      holder.style.height = `${h}px`;
+      holder.style.left = `${r.left + r.width / 2}px`;
+      holder.style.top = `${r.top + r.height / 2}px`;
+      const flipper = inner.querySelector(`.${styles.flipper}`)!.cloneNode(true) as HTMLElement;
+      flipper.style.fontFamily = NAPKIN_FONTS[meta.look.fontPreset - 1].family;
+      holder.appendChild(flipper);
+      document.body.appendChild(holder);
+      const box = modalBox();
+      const scale = Math.min(box.w / w, box.h / h);
+      return {
+        holder,
+        flipper,
+        tilt: meta.look.tilt,
+        dx: box.cx - (r.left + r.width / 2),
+        dy: box.cy - (r.top + r.height / 2),
+        scale,
+        spot,
+      };
+    },
+    [lookOf]
+  );
 
   const openNapkin = useCallback(
     async (slug: string, { pushUrl = true } = {}) => {
       if (busy.current) return;
       if (performance.now() < suppressClickUntil.current) return;
       busy.current = true;
+      paused.current = true; // freeze the table under the flight and modal
       setError(null);
       const skipFlight = prefersReducedMotion();
       let flight: ReturnType<typeof buildFlight> = null;
@@ -417,6 +469,7 @@ export function NapkinsDrawer({
         flight?.holder.remove();
         flightEl.current = null;
         if (flight) flight.spot.style.visibility = "";
+        paused.current = false;
         setError("Couldn’t open that napkin — give it another try.");
       } finally {
         busy.current = false;
@@ -431,16 +484,24 @@ export function NapkinsDrawer({
       setOpenPiece(null); // dialog closes instantly; the napkin flies home under it
       setOpenSlug(null);
       if (pushUrl) window.history.pushState(null, "", urlFor(null));
-      if (!slug) return;
+      if (!slug) {
+        paused.current = false;
+        return;
+      }
       const spot = napkinNode(slug);
-      if (!spot) return;
+      if (!spot) {
+        paused.current = false;
+        return;
+      }
       if (prefersReducedMotion()) {
         spot.style.visibility = "";
+        paused.current = false;
         return;
       }
       const flight = buildFlight(slug);
       if (!flight) {
         spot.style.visibility = "";
+        paused.current = false;
         return;
       }
       const { holder, flipper, tilt, dx, dy, scale } = flight;
@@ -456,6 +517,7 @@ export function NapkinsDrawer({
       setTimeout(() => {
         holder.remove();
         spot.style.visibility = "";
+        paused.current = false;
       }, FLIGHT_MS + 40);
     },
     [openSlug, buildFlight]
@@ -477,6 +539,7 @@ export function NapkinsDrawer({
     if (initialPiece) {
       const spot = napkinNode(initialPiece.entry.slug);
       if (spot) spot.style.visibility = "hidden";
+      paused.current = true;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -484,6 +547,7 @@ export function NapkinsDrawer({
   return (
     <main className={styles.page}>
       <div ref={viewportRef} className={styles.viewport}>
+        <div ref={woodRef} className={styles.wood} aria-hidden="true" />
         <div ref={fieldRef} className={styles.field}>
           {napkins.map((n) => (
             <Napkin
