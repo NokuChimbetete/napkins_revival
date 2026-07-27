@@ -27,7 +27,8 @@ const root = path.join(import.meta.dirname, "..");
 const papersOut = path.join(root, "public", "playground", "papers");
 const fontsOut = path.join(root, "src", "fonts", "playground");
 
-const MAX_WIDTH = 640;
+// 1024: the flip-to-modal animation scales a napkin up to ~1000px wide
+const MAX_WIDTH = 1024;
 const WEBP_QUALITY = 80;
 
 // destination name → source path relative to the "Napkins Fonts" folder

@@ -28,6 +28,9 @@ export type NapkinLook = {
   jitterX: number;
   jitterY: number;
   z: number;
+  /** position on the pannable 2D field, % of field size */
+  fx: number;
+  fy: number;
 };
 
 export type NapkinMeta = {
@@ -71,7 +74,27 @@ export function napkinLook(entry: Pick<Entry, "slug" | "napkin_variant" | "font_
     jitterX: Math.round(roll("jx", slug) * 44 - 22),
     jitterY: Math.round(roll("jy", slug) * 36 - 18),
     z: 1 + (fnv1a("z" + slug) % 24),
+    fx: 0, // assigned after the deterministic shuffle (needs the pile index)
+    fy: 0,
   };
+}
+
+/** columns of the 2D field; rows follow from the piece count */
+export const FIELD_COLS = 12;
+
+/** Cell-grid position on the field with hash jitter, as % of field size.
+ *  Depends on the napkin's index in the shuffled pile, so the layout reflows
+ *  only when the set of pieces changes (a new issue re-deals the table). */
+function assignFieldPositions(napkins: NapkinMeta[]) {
+  const rows = Math.ceil(napkins.length / FIELD_COLS);
+  napkins.forEach((n, i) => {
+    const col = i % FIELD_COLS;
+    const row = Math.floor(i / FIELD_COLS);
+    const jx = (roll("fjx", n.slug) - 0.5) * 0.82;
+    const jy = (roll("fjy", n.slug) - 0.5) * 0.82;
+    n.look.fx = Math.round(((col + 0.5 + jx) / FIELD_COLS) * 1000) / 10;
+    n.look.fy = Math.round(((row + 0.5 + jy) / rows) * 1000) / 10;
+  });
 }
 
 const isCreative = (p: Entry) => p.category !== "Introduction";
@@ -106,6 +129,7 @@ export async function getPlaygroundNapkins(): Promise<NapkinMeta[]> {
     }
   }
   napkins.sort((a, b) => fnv1a("order" + a.slug) - fnv1a("order" + b.slug));
+  assignFieldPositions(napkins);
   return napkins;
 }
 

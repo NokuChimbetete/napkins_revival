@@ -1,83 +1,59 @@
-/* ————— The Napkins Drawer ————— */
+/* ————— The Napkins Drawer: a wooden table you pan across ————— */
 
 .page {
+  position: fixed;
+  inset: 0;
   background: #fff;
-  min-height: 100vh;
-  /* jittered napkins poke past the grid; never let them cause an x-scrollbar */
-  overflow-x: clip;
-  padding-bottom: 7rem;
+  overflow: hidden;
 }
 
-.head {
-  text-align: center;
-  padding: 2.6rem 1.5rem 1.2rem;
+/* the window onto the table; all pan input lands here */
+.viewport {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  touch-action: none;
+  overscroll-behavior: none;
+  user-select: none;
 }
 
-.backLink {
-  display: inline-block;
-  margin-bottom: 1.6rem;
-  font-size: 13px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: #6d6d6d;
-  text-decoration: none;
+@media (pointer: fine) {
+  .viewport {
+    cursor: none; /* the dot cursor takes over */
+  }
 }
 
-.backLink:hover {
-  color: #0071ad;
+.grabbing {
+  cursor: grabbing;
 }
 
-.pageTitle {
-  font-family: var(--font-archivo-black), sans-serif;
-  font-size: clamp(1.8rem, 4.5vw, 3rem);
-  margin: 0 0 0.5rem;
-  color: #1b1b1b;
-}
-
-.subtitle {
-  font-family: var(--font-caveat), cursive;
-  font-size: clamp(1.15rem, 2.4vw, 1.5rem);
-  color: #7a7a7a;
-  margin: 0;
-}
-
-.error {
-  text-align: center;
-  color: #b3401f;
-  font-size: 14px;
-  margin: 0.6rem 0 0;
-}
-
-/* ————— the pile ————— */
-
-.canvas {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  /* generous bottom padding: the last row's napkins overflow their slots */
-  padding: 2.5rem 4vw 10rem;
-  row-gap: 0;
-}
-
-/* Slots are shorter than the napkins they hold — the napkin is absolutely
-   positioned so it overflows its slot and overlaps the next row; the
-   per-piece jitter then scatters everything into a pile. (If the cell sat in
-   normal flow the grid row would just stretch to fit it.) */
-.slot {
-  position: relative;
-  aspect-ratio: 3 / 2.9;
-}
-
-.cell {
+/* the table itself — moved only via translate3d from the pan loop */
+.field {
   position: absolute;
   top: 0;
   left: 0;
-  right: 0;
-  z-index: var(--z, 1);
+  width: 5040px;  /* FIELD_COLS(12) × 420 */
+  height: 4900px; /* rows(10) × 490 */
+  background: url("/playground/wood.webp") repeat;
+  background-size: 512px 512px;
+  will-change: transform;
 }
 
-.cell:hover,
-.cell:focus-within {
-  z-index: 100;
+@media (max-width: 700px) {
+  .field {
+    width: 3480px;
+    height: 3450px;
+    background-size: 384px 384px;
+  }
+}
+
+/* ————— napkins on the field ————— */
+
+.spot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  content-visibility: auto;
+  contain-intrinsic-size: 300px 380px;
 }
 
 .scene {
@@ -85,28 +61,27 @@
   border: none;
   background: none;
   padding: 0;
-  cursor: pointer;
-  margin-inline: auto;
+  cursor: inherit;
   perspective: 900px;
   -webkit-tap-highlight-color: transparent;
 }
 
-.scene[data-size="0"] {
-  width: 76%;
-}
-.scene[data-size="1"] {
-  width: 90%;
-}
-.scene[data-size="2"] {
-  width: 103%;
+.scene[data-size="0"] { width: 195px; }
+.scene[data-size="1"] { width: 240px; }
+.scene[data-size="2"] { width: 290px; }
+
+@media (max-width: 700px) {
+  .scene[data-size="0"] { width: 150px; }
+  .scene[data-size="1"] { width: 180px; }
+  .scene[data-size="2"] { width: 212px; }
 }
 
 .napkin {
   display: block;
   width: 100%;
   aspect-ratio: 3 / 4;
-  transform: translate(var(--jx), var(--jy)) rotate(var(--tilt));
-  transition: transform 170ms ease;
+  transform: rotate(var(--tilt));
+  transition: transform 200ms ease;
   will-change: transform;
 }
 
@@ -116,10 +91,9 @@
 }
 
 /* hover lifts and straightens — transform only, never shadow/filter */
-.scene:hover .napkin:not(.flipped),
-.scene:focus-visible .napkin:not(.flipped) {
-  transform: translate(var(--jx), var(--jy)) translateY(-10px)
-    rotate(calc(var(--tilt) * 0.3)) scale(1.05);
+.scene:hover .napkin,
+.scene:focus-visible .napkin {
+  transform: translateY(-12px) rotate(calc(var(--tilt) * 0.25)) scale(1.06);
 }
 
 .scene:focus-visible {
@@ -133,11 +107,6 @@
   width: 100%;
   height: 100%;
   transform-style: preserve-3d;
-  transition: transform 300ms cubic-bezier(0.35, 0.1, 0.25, 1);
-}
-
-.flipped .flipper {
-  transform: rotateY(180deg);
 }
 
 .face {
@@ -167,6 +136,21 @@
   pointer-events: none;
 }
 
+/* ————— the flight: a napkin rising to become the modal ————— */
+
+.flight {
+  position: fixed;
+  z-index: 60;
+  pointer-events: none;
+  perspective: 1400px;
+  will-change: transform;
+}
+
+.flight .flipper {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
 /* ————— napkin text ————— */
 
 .text {
@@ -182,14 +166,16 @@
 }
 
 /* per-paper safe areas so the words always sit on the sheet, clear of torn
-   edges, tape, curled corners and the pointed bottom of the unfolded one */
-.scene[data-variant="1"] .text { top: 12%; right: 9%; bottom: 12%; left: 17%; }
-.scene[data-variant="2"] .text { top: 16%; right: 22%; bottom: 24%; left: 25%; }
-.scene[data-variant="3"] .text { top: 22%; right: 15%; bottom: 22%; left: 13%; }
-.scene[data-variant="4"] .text { top: 21%; right: 13%; bottom: 19%; left: 19%; }
-.scene[data-variant="5"] .text { top: 12%; right: 17%; bottom: 11%; left: 9%; }
-.scene[data-variant="6"] .text { top: 13%; right: 15%; bottom: 11%; left: 14%; }
-.scene[data-variant="7"] .text { top: 10%; right: 15%; bottom: 31%; left: 13%; }
+   edges, tape, curled corners and the pointed bottom of the unfolded one.
+   Attribute-only selectors: the fly-to-modal clone carries the same data
+   attributes on its holder but is not a .scene. */
+[data-variant="1"] .text { top: 12%; right: 9%; bottom: 12%; left: 17%; }
+[data-variant="2"] .text { top: 16%; right: 22%; bottom: 24%; left: 25%; }
+[data-variant="3"] .text { top: 22%; right: 15%; bottom: 22%; left: 13%; }
+[data-variant="4"] .text { top: 21%; right: 13%; bottom: 19%; left: 19%; }
+[data-variant="5"] .text { top: 12%; right: 17%; bottom: 11%; left: 9%; }
+[data-variant="6"] .text { top: 13%; right: 15%; bottom: 11%; left: 14%; }
+[data-variant="7"] .text { top: 10%; right: 15%; bottom: 31%; left: 13%; }
 
 .title {
   display: -webkit-box;
@@ -197,7 +183,7 @@
   -webkit-line-clamp: 4;
   overflow: hidden;
   line-height: 1.18;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .author {
@@ -209,15 +195,145 @@
   opacity: 0.72;
 }
 
-.scene[data-size="0"] .title { font-size: 0.92rem; }
-.scene[data-size="1"] .title { font-size: 1.12rem; }
-.scene[data-size="2"] .title { font-size: 1.32rem; }
-.scene[data-size="0"] .author { font-size: 0.68rem; }
-.scene[data-size="1"] .author { font-size: 0.75rem; }
-.scene[data-size="2"] .author { font-size: 0.82rem; }
+[data-size="0"] .title { font-size: 0.92rem; }
+[data-size="1"] .title { font-size: 1.12rem; }
+[data-size="2"] .title { font-size: 1.32rem; }
+[data-size="0"] .author { font-size: 0.68rem; }
+[data-size="1"] .author { font-size: 0.75rem; }
+[data-size="2"] .author { font-size: 0.82rem; }
 
 .text[data-long] .title {
   font-size: 0.85em;
+}
+
+@media (max-width: 700px) {
+  [data-size="0"] .title { font-size: 0.82rem; }
+  [data-size="1"] .title { font-size: 0.95rem; }
+  [data-size="2"] .title { font-size: 1.1rem; }
+}
+
+/* ————— fixed chrome above the field ————— */
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  display: flex;
+  align-items: baseline;
+  gap: 1.2rem;
+  padding: 1.1rem 1.4rem;
+  pointer-events: none;
+}
+
+.overlay > * {
+  pointer-events: auto;
+}
+
+.backLink {
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #6d6d6d;
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.82);
+  padding: 6px 10px;
+  border-radius: 999px;
+}
+
+.backLink:hover {
+  color: #0071ad;
+}
+
+.overlayTitle {
+  font-family: var(--font-archivo-black), sans-serif;
+  font-size: 15px;
+  color: #1b1b1b;
+  background: rgba(255, 255, 255, 0.82);
+  padding: 6px 12px;
+  border-radius: 999px;
+}
+
+.overlayCount {
+  margin-left: auto;
+  font-family: var(--font-caveat), cursive;
+  font-size: 16px;
+  color: #7a7a7a;
+  background: rgba(255, 255, 255, 0.82);
+  padding: 6px 12px;
+  border-radius: 999px;
+}
+
+/* the reference site's affordance for the unusual scroll */
+.hint {
+  position: fixed;
+  bottom: 26px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 0.55em;
+  font-size: 13px;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: #6d6d6d;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 9px 16px;
+  border-radius: 999px;
+  transition: opacity 600ms ease;
+  pointer-events: none;
+}
+
+.hintGlyph {
+  font-size: 16px;
+  color: #e2622b;
+}
+
+.hintGone {
+  opacity: 0;
+}
+
+.error {
+  position: fixed;
+  top: 64px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  color: #b3401f;
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 6px 14px;
+  border-radius: 999px;
+  margin: 0;
+}
+
+/* the dot cursor (desktop only; hidden wherever the real cursor returns) */
+.dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 90;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #e2622b;
+  pointer-events: none;
+  transform: translate3d(-100px, -100px, 0);
+  transition: width 150ms ease, height 150ms ease;
+  display: none;
+}
+
+@media (pointer: fine) {
+  .dot {
+    display: block;
+  }
+}
+
+.dotBig {
+  width: 26px;
+  height: 26px;
 }
 
 /* ————— the modal (the napkin's other side) ————— */
@@ -232,21 +348,11 @@
   border-radius: 10px;
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
   overflow: hidden;
+  cursor: auto; /* the page hides the cursor for the dot; restore it here */
 }
 
 .modal::backdrop {
-  background: rgba(24, 22, 20, 0.45);
-}
-
-.modal[open] {
-  animation: modalIn 170ms ease-out;
-}
-
-@keyframes modalIn {
-  from {
-    opacity: 0;
-    transform: translateY(12px) scale(0.985);
-  }
+  background: rgba(46, 38, 30, 0.42);
 }
 
 .modalInner {
@@ -315,39 +421,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .napkin,
-  .flipper {
-    transition: none;
-  }
-  .modal[open] {
-    animation: none;
-  }
-}
-
-/* ————— mobile: a loose stack, no overlap ————— */
-
-@media (max-width: 700px) {
-  .canvas {
-    grid-template-columns: repeat(2, 1fr);
-    row-gap: 1.1rem;
-    column-gap: 0.6rem;
-    padding: 1.6rem 4vw 3rem;
-  }
-  .slot {
-    aspect-ratio: auto;
-  }
-  .cell {
-    position: static;
-  }
-  .scene[data-size="0"],
-  .scene[data-size="1"],
-  .scene[data-size="2"] {
-    width: 94%;
-  }
-  .napkin {
-    transform: rotate(calc(var(--tilt) * 0.45));
-  }
-  .scene:hover .napkin:not(.flipped),
-  .scene:focus-visible .napkin:not(.flipped) {
-    transform: rotate(calc(var(--tilt) * 0.2)) translateY(-6px) scale(1.03);
+  .flight,
+  .flight .flipper {
+    transition: none !important;
   }
 }
