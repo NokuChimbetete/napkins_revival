@@ -23,6 +23,10 @@ export type Entry = {
   /** force verse treatment (no-wrap, wider measure) even when category isn't "poetry" */
   verse?: boolean;
   sort_order: number;
+  /** explicit napkin pairing from the DB; when absent the playground derives
+   *  both deterministically from the slug (hash % count) */
+  napkin_variant?: number | null;
+  font_preset?: number | null;
 };
 
 export type IssueContent = {
@@ -101,6 +105,8 @@ export async function getIssueContent(issueNumber: number): Promise<IssueContent
               galleries: (p.galleries as string[][]) ?? [],
               images: (p.images as string[]) ?? [],
               sort_order: p.sort_order ?? i,
+              napkin_variant: p.napkin_variant ?? null,
+              font_preset: p.font_preset ?? null,
             })),
             page_images: (issue.page_images as string[]) ?? [],
             pdf_download: issue.pdf_url || null,

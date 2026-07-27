@@ -1,0 +1,353 @@
+/* ————— The Napkins Drawer ————— */
+
+.page {
+  background: #fff;
+  min-height: 100vh;
+  /* jittered napkins poke past the grid; never let them cause an x-scrollbar */
+  overflow-x: clip;
+  padding-bottom: 7rem;
+}
+
+.head {
+  text-align: center;
+  padding: 2.6rem 1.5rem 1.2rem;
+}
+
+.backLink {
+  display: inline-block;
+  margin-bottom: 1.6rem;
+  font-size: 13px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #6d6d6d;
+  text-decoration: none;
+}
+
+.backLink:hover {
+  color: #0071ad;
+}
+
+.pageTitle {
+  font-family: var(--font-archivo-black), sans-serif;
+  font-size: clamp(1.8rem, 4.5vw, 3rem);
+  margin: 0 0 0.5rem;
+  color: #1b1b1b;
+}
+
+.subtitle {
+  font-family: var(--font-caveat), cursive;
+  font-size: clamp(1.15rem, 2.4vw, 1.5rem);
+  color: #7a7a7a;
+  margin: 0;
+}
+
+.error {
+  text-align: center;
+  color: #b3401f;
+  font-size: 14px;
+  margin: 0.6rem 0 0;
+}
+
+/* ————— the pile ————— */
+
+.canvas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  /* generous bottom padding: the last row's napkins overflow their slots */
+  padding: 2.5rem 4vw 10rem;
+  row-gap: 0;
+}
+
+/* Slots are shorter than the napkins they hold — the napkin is absolutely
+   positioned so it overflows its slot and overlaps the next row; the
+   per-piece jitter then scatters everything into a pile. (If the cell sat in
+   normal flow the grid row would just stretch to fit it.) */
+.slot {
+  position: relative;
+  aspect-ratio: 3 / 2.9;
+}
+
+.cell {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z, 1);
+}
+
+.cell:hover,
+.cell:focus-within {
+  z-index: 100;
+}
+
+.scene {
+  display: block;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  margin-inline: auto;
+  perspective: 900px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.scene[data-size="0"] {
+  width: 76%;
+}
+.scene[data-size="1"] {
+  width: 90%;
+}
+.scene[data-size="2"] {
+  width: 103%;
+}
+
+.napkin {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  transform: translate(var(--jx), var(--jy)) rotate(var(--tilt));
+  transition: transform 170ms ease;
+  will-change: transform;
+}
+
+/* the sticky note is the one landscape paper */
+.scene[data-variant="2"] .napkin {
+  aspect-ratio: 4 / 3;
+}
+
+/* hover lifts and straightens — transform only, never shadow/filter */
+.scene:hover .napkin:not(.flipped),
+.scene:focus-visible .napkin:not(.flipped) {
+  transform: translate(var(--jx), var(--jy)) translateY(-10px)
+    rotate(calc(var(--tilt) * 0.3)) scale(1.05);
+}
+
+.scene:focus-visible {
+  outline: 2px dashed #0071ad;
+  outline-offset: 6px;
+}
+
+.flipper {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 300ms cubic-bezier(0.35, 0.1, 0.25, 1);
+}
+
+.flipped .flipper {
+  transform: rotateY(180deg);
+}
+
+.face {
+  position: absolute;
+  inset: 0;
+  display: block;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.back {
+  transform: rotateY(180deg);
+}
+
+/* a real flip shows the sheet's silhouette mirrored */
+.back .paper {
+  transform: scaleX(-1);
+}
+
+.paper {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill; /* element aspect matches the image aspect, so no distortion */
+  user-select: none;
+  pointer-events: none;
+}
+
+/* ————— napkin text ————— */
+
+.text {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+  text-align: center;
+  color: #262626;
+  overflow: hidden;
+}
+
+/* per-paper safe areas so the words always sit on the sheet, clear of torn
+   edges, tape, curled corners and the pointed bottom of the unfolded one */
+.scene[data-variant="1"] .text { top: 12%; right: 9%; bottom: 12%; left: 17%; }
+.scene[data-variant="2"] .text { top: 16%; right: 22%; bottom: 24%; left: 25%; }
+.scene[data-variant="3"] .text { top: 22%; right: 15%; bottom: 22%; left: 13%; }
+.scene[data-variant="4"] .text { top: 21%; right: 13%; bottom: 19%; left: 19%; }
+.scene[data-variant="5"] .text { top: 12%; right: 17%; bottom: 11%; left: 9%; }
+.scene[data-variant="6"] .text { top: 13%; right: 15%; bottom: 11%; left: 14%; }
+.scene[data-variant="7"] .text { top: 10%; right: 15%; bottom: 31%; left: 13%; }
+
+.title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  overflow: hidden;
+  line-height: 1.18;
+  overflow-wrap: anywhere;
+}
+
+.author {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  line-height: 1.25;
+  opacity: 0.72;
+}
+
+.scene[data-size="0"] .title { font-size: 0.92rem; }
+.scene[data-size="1"] .title { font-size: 1.12rem; }
+.scene[data-size="2"] .title { font-size: 1.32rem; }
+.scene[data-size="0"] .author { font-size: 0.68rem; }
+.scene[data-size="1"] .author { font-size: 0.75rem; }
+.scene[data-size="2"] .author { font-size: 0.82rem; }
+
+.text[data-long] .title {
+  font-size: 0.85em;
+}
+
+/* ————— the modal (the napkin's other side) ————— */
+
+.modal {
+  border: none;
+  padding: 0;
+  /* Tailwind preflight zeroes the UA's `dialog { margin: auto }` centering */
+  margin: auto;
+  background: #fff;
+  width: min(1020px, 94vw);
+  border-radius: 10px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+}
+
+.modal::backdrop {
+  background: rgba(24, 22, 20, 0.45);
+}
+
+.modal[open] {
+  animation: modalIn 170ms ease-out;
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.985);
+  }
+}
+
+.modalInner {
+  max-height: 86vh;
+  overflow-y: auto;
+  padding: 0 clamp(16px, 4vw, 44px) 1rem;
+}
+
+.modalHead {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.94);
+  border-bottom: 1px solid #ececec;
+  padding: 14px 0 12px;
+}
+
+.modalIssue {
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #828282;
+}
+
+.modalClose {
+  border: none;
+  background: none;
+  font-size: 28px;
+  line-height: 1;
+  padding: 0 4px;
+  cursor: pointer;
+  color: #6d6d6d;
+}
+
+.modalClose:hover {
+  color: #1b1b1b;
+}
+
+/* replicates the reader's .entries context (960px, self-limited children) */
+.entryHost {
+  max-width: 960px;
+  margin: 0 auto;
+  padding-bottom: 8px;
+}
+
+.modalFoot {
+  border-top: 1px solid #ececec;
+  margin-top: 1.6rem;
+  padding: 1.1rem 0 1.4rem;
+  text-align: center;
+}
+
+.modalFootLink {
+  color: #0071ad;
+  font-size: 15px;
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 1px;
+}
+
+/* ————— reduced motion ————— */
+
+@media (prefers-reduced-motion: reduce) {
+  .napkin,
+  .flipper {
+    transition: none;
+  }
+  .modal[open] {
+    animation: none;
+  }
+}
+
+/* ————— mobile: a loose stack, no overlap ————— */
+
+@media (max-width: 700px) {
+  .canvas {
+    grid-template-columns: repeat(2, 1fr);
+    row-gap: 1.1rem;
+    column-gap: 0.6rem;
+    padding: 1.6rem 4vw 3rem;
+  }
+  .slot {
+    aspect-ratio: auto;
+  }
+  .cell {
+    position: static;
+  }
+  .scene[data-size="0"],
+  .scene[data-size="1"],
+  .scene[data-size="2"] {
+    width: 94%;
+  }
+  .napkin {
+    transform: rotate(calc(var(--tilt) * 0.45));
+  }
+  .scene:hover .napkin:not(.flipped),
+  .scene:focus-visible .napkin:not(.flipped) {
+    transform: rotate(calc(var(--tilt) * 0.2)) translateY(-6px) scale(1.03);
+  }
+}
