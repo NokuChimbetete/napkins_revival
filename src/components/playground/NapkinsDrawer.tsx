@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { NapkinMeta, PlaygroundPiece } from "@/lib/playground";
 import { NAPKIN_FONTS } from "@/app/playground/fonts";
 import { Napkin } from "./Napkin";
+import { NapkinSearch } from "./NapkinSearch";
 import { PieceModal } from "./PieceModal";
 import styles from "./playground.module.css";
 
@@ -31,7 +32,8 @@ import styles from "./playground.module.css";
  */
 
 const FLIGHT_MS = 420;
-const SCROLL_SPEED = 0.4;
+// the reference default is 0.4; nudged up on request — drag stays at hers
+const SCROLL_SPEED = 0.55;
 const DRAG_SPEED = 0.5;
 const EASE = 0.067; // je(0.3) in the source: 0..1 mapped onto 0.01..0.2
 const SMOOTH = 0.04;
@@ -41,7 +43,7 @@ const PARALLAX_CHILD = 1;
 const WOOD_TILE = 512;
 
 /** field dimensions must match the CSS spot percentages' frame of reference */
-const FIELD = { desktop: { w: 5040, h: 4900 }, mobile: { w: 3480, h: 3450 } };
+const FIELD = { desktop: { w: 4440, h: 4340 }, mobile: { w: 3300, h: 3200 } };
 
 const urlFor = (slug?: string | null) =>
   slug ? `/playground?piece=${encodeURIComponent(slug)}` : "/playground";
@@ -329,6 +331,8 @@ export function NapkinsDrawer({
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (openPiece || busy.current) return;
+      const t = e.target as HTMLElement;
+      if (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable) return;
       const step = e.shiftKey ? 480 : 180;
       const map: Record<string, [number, number]> = {
         ArrowLeft: [step, 0],
@@ -351,7 +355,7 @@ export function NapkinsDrawer({
   }, [openPiece]);
 
   const centerOn = useCallback(
-    (slug: string) => {
+    (slug: string, instant = false) => {
       const meta = lookOf(slug);
       if (!meta) return;
       const { w: W, h: H } = fieldSize.current;
@@ -362,8 +366,13 @@ export function NapkinsDrawer({
       ty += H * Math.round((target.current.y - ty) / H);
       target.current.x = tx;
       target.current.y = ty;
+      if (instant) {
+        cur.current.x = last.current.x = tx;
+        cur.current.y = last.current.y = ty;
+        frame();
+      }
     },
-    [lookOf]
+    [lookOf, frame]
   );
 
   useEffect(() => {
@@ -428,14 +437,20 @@ export function NapkinsDrawer({
   );
 
   const openNapkin = useCallback(
-    async (slug: string, { pushUrl = true } = {}) => {
+    async (slug: string, { pushUrl = true, withFlight = true } = {}) => {
       if (busy.current) return;
       if (performance.now() < suppressClickUntil.current) return;
       busy.current = true;
       paused.current = true; // freeze the table under the flight and modal
       setError(null);
-      const skipFlight = prefersReducedMotion();
+      const skipFlight = !withFlight || prefersReducedMotion();
       let flight: ReturnType<typeof buildFlight> = null;
+      if (skipFlight) {
+        // e.g. opened from search: no paper flips anywhere, the modal just
+        // appears, with the (hidden) napkin centred behind it for close
+        const spot = napkinNode(slug);
+        if (spot) spot.style.visibility = "hidden";
+      }
       if (!skipFlight) {
         flight = buildFlight(slug);
         if (flight) {
@@ -469,6 +484,10 @@ export function NapkinsDrawer({
         flight?.holder.remove();
         flightEl.current = null;
         if (flight) flight.spot.style.visibility = "";
+        if (skipFlight) {
+          const spot = napkinNode(slug);
+          if (spot) spot.style.visibility = "";
+        }
         paused.current = false;
         setError("Couldn’t open that napkin — give it another try.");
       } finally {
@@ -566,6 +585,13 @@ export function NapkinsDrawer({
         </Link>
         <span className={styles.overlayTitle}>The Napkins Drawer</span>
         <span className={styles.overlayCount}>{napkins.length} napkins</span>
+        <NapkinSearch
+          napkins={napkins}
+          onPick={(slug) => {
+            centerOn(slug, true);
+            void openNapkin(slug, { withFlight: false });
+          }}
+        />
       </header>
 
       <div className={`${styles.hint}${hintGone ? ` ${styles.hintGone}` : ""}`} aria-hidden="true">
