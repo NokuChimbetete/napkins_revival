@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { NapkinMeta } from "@/lib/playground";
 import styles from "./playground.module.css";
 
@@ -28,6 +28,7 @@ export function NapkinSearch({
   const inputRef = useRef<HTMLInputElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
+  const listId = useId();
 
   const results = useMemo(() => {
     const q = fold(query.trim());
@@ -48,7 +49,9 @@ export function NapkinSearch({
     return scored.slice(0, 6).map((s) => s.n);
   }, [napkins, query]);
 
-  useEffect(() => setSelected(0), [query]);
+  // clamp rather than reset-via-effect: typing narrows the list, and a stale
+  // index would otherwise point past the end for one render
+  const active = Math.min(selected, Math.max(results.length - 1, 0));
 
   useEffect(() => {
     if (open) inputRef.current?.focus();
@@ -104,41 +107,55 @@ export function NapkinSearch({
         </button>
       )}
       {open && (
-        <div className={styles.searchBox} role="combobox" aria-expanded={results.length > 0}>
+        <div className={styles.searchBox}>
           <input
             ref={inputRef}
             className={styles.searchInput}
             type="text"
+            role="combobox"
+            aria-expanded={results.length > 0}
+            aria-controls={listId}
+            aria-activedescendant={results[active] ? `${listId}-${active}` : undefined}
+            aria-autocomplete="list"
+            aria-label="Search the napkins"
             value={query}
             placeholder="title, author…"
             spellCheck={false}
             autoComplete="off"
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setSelected(0);
+            }}
             onKeyDown={(e) => {
               // keep keystrokes from panning the canvas underneath
               e.stopPropagation();
               if (e.key === "Escape") close();
               else if (e.key === "ArrowDown") {
                 e.preventDefault();
-                setSelected((s) => Math.min(s + 1, results.length - 1));
+                setSelected(Math.min(active + 1, results.length - 1));
               } else if (e.key === "ArrowUp") {
                 e.preventDefault();
-                setSelected((s) => Math.max(s - 1, 0));
-              } else if (e.key === "Enter" && results[selected]) {
-                pick(results[selected].slug);
+                setSelected(Math.max(active - 1, 0));
+              } else if (e.key === "Enter" && results[active]) {
+                pick(results[active].slug);
               }
             }}
           />
           {query.trim() && (
-            <ul className={styles.searchResults} role="listbox">
-              {results.length === 0 && <li className={styles.searchEmpty}>no napkins match</li>}
+            <ul id={listId} className={styles.searchResults} role="listbox" aria-label="Matching napkins">
+              {results.length === 0 && (
+                <li className={styles.searchEmpty} role="presentation">
+                  no napkins match
+                </li>
+              )}
               {results.map((n, i) => (
-                <li key={n.slug}>
+                <li key={n.slug} role="presentation">
                   <button
                     type="button"
+                    id={`${listId}-${i}`}
                     role="option"
-                    aria-selected={i === selected}
-                    className={`${styles.searchResult}${i === selected ? ` ${styles.searchResultActive}` : ""}`}
+                    aria-selected={i === active}
+                    className={`${styles.searchResult}${i === active ? ` ${styles.searchResultActive}` : ""}`}
                     onPointerEnter={() => setSelected(i)}
                     onClick={() => pick(n.slug)}
                   >
