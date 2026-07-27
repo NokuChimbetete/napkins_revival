@@ -24,9 +24,6 @@ export type NapkinLook = {
   tilt: number;
   /** 0 small · 1 medium · 2 large */
   size: number;
-  /** scatter offset within the grid cell, % of cell */
-  jitterX: number;
-  jitterY: number;
   z: number;
   /** position on the pannable 2D field, % of field size */
   fx: number;
@@ -74,10 +71,8 @@ export function napkinLook(entry: Pick<Entry, "slug" | "napkin_variant" | "font_
     fontPreset: entry.font_preset ?? (fnv1a("font" + slug) % FONT_PRESET_COUNT) + 1,
     tilt: Math.round((roll("tilt", slug) * 24 - 12) * 10) / 10,
     size: sizeRoll < 0.3 ? 0 : sizeRoll < 0.82 ? 1 : 2,
-    jitterX: Math.round(roll("jx", slug) * 44 - 22),
-    jitterY: Math.round(roll("jy", slug) * 36 - 18),
     z: 1 + (fnv1a("z" + slug) % 24),
-    fx: 0, // assigned after the deterministic shuffle (needs the pile index)
+    fx: 0, // assigned by assignFieldPositions (needs the piece's place in print order)
     fy: 0,
     parallaxEase: Math.round((0.5 + roll("pe", slug) * 0.5) * 100) / 100,
   };
@@ -86,18 +81,49 @@ export function napkinLook(entry: Pick<Entry, "slug" | "napkin_variant" | "font_
 /** columns of the 2D field; rows follow from the piece count */
 export const FIELD_COLS = 12;
 
-/** Cell-grid position on the field with hash jitter, as % of field size.
- *  Depends on the napkin's index in the shuffled pile, so the layout reflows
- *  only when the set of pieces changes (a new issue re-deals the table). */
+/** cell pitch in px. The field grows by ADDING ROWS at this pitch, so the
+ *  density never changes as the archive fills up. Desktop values reproduce
+ *  the hand-tuned 4440×4340 field that held the first 110 napkins. */
+const CELL = { desktop: { w: 370, h: 434 }, mobile: { w: 275, h: 320 } };
+
+export type FieldSize = { desktop: { w: number; h: number }; mobile: { w: number; h: number } };
+
+/** The single source of truth for the table's dimensions — handed to the
+ *  client component, which sets both the CSS box and the pan engine's wrap
+ *  period from it. They must agree exactly or the infinite wrap tears. */
+export function fieldSizeFor(count: number): FieldSize {
+  const rows = Math.max(1, Math.ceil(count / FIELD_COLS));
+  return {
+    desktop: { w: FIELD_COLS * CELL.desktop.w, h: rows * CELL.desktop.h },
+    mobile: { w: FIELD_COLS * CELL.mobile.w, h: rows * CELL.mobile.h },
+  };
+}
+
+/**
+ * Seat every napkin on the field, in print order — oldest issue at the top,
+ * newest at the bottom, each piece keeping its place within its issue.
+ *
+ * The point of print order is permanence: a new issue only ever appends rows
+ * below, so every napkin already on the table keeps its exact spot. (Ordering
+ * by a hash instead would interleave new pieces into the middle and shove
+ * everyone along, re-dealing the whole table on each publication.)
+ *
+ * Positions are percentages, which stay put as the field grows because the row
+ * count cancels: y = (row + ½ + jitter)/rows × (rows × cellH) = a fixed pixel
+ * offset, whatever `rows` becomes.
+ */
 function assignFieldPositions(napkins: NapkinMeta[]) {
-  const rows = Math.ceil(napkins.length / FIELD_COLS);
+  const rows = Math.max(1, Math.ceil(napkins.length / FIELD_COLS));
   napkins.forEach((n, i) => {
     const col = i % FIELD_COLS;
     const row = Math.floor(i / FIELD_COLS);
+    // ±0.41 of a cell, so the rows read as a strewn pile, not a spreadsheet
     const jx = (roll("fjx", n.slug) - 0.5) * 0.82;
     const jy = (roll("fjy", n.slug) - 0.5) * 0.82;
-    n.look.fx = Math.round(((col + 0.5 + jx) / FIELD_COLS) * 1000) / 10;
-    n.look.fy = Math.round(((row + 0.5 + jy) / rows) * 1000) / 10;
+    // 4 decimals (sub-0.01px): coarser rounding is granular in *percent*, so
+    // the quantisation would shift as the field grows and nudge every napkin
+    n.look.fx = Math.round(((col + 0.5 + jx) / FIELD_COLS) * 1e6) / 1e4;
+    n.look.fy = Math.round(((row + 0.5 + jy) / rows) * 1e6) / 1e4;
   });
 }
 
@@ -113,13 +139,19 @@ async function loadAll(): Promise<{ content: { pieces: Entry[] }; issue_number: 
   return all;
 }
 
-/** Every creative piece (Forewords excluded), shuffled deterministically so
- *  the issues intermingle in the pile. ~15KB of metadata — piece bodies stay
- *  on the server until a napkin is opened. */
+/** Every creative piece (Forewords excluded), laid out in print order so the
+ *  table reads oldest-at-the-top and new issues only ever extend it downward.
+ *  ~15KB of metadata — piece bodies stay on the server until a napkin opens. */
 export async function getPlaygroundNapkins(): Promise<NapkinMeta[]> {
   const napkins: NapkinMeta[] = [];
   for (const { content, issue_number, season } of await loadAll()) {
-    for (const p of content.pieces.filter(isCreative)) {
+    const ordered = content.pieces
+      .filter(isCreative)
+      // sort explicitly: seating must not depend on fixture key order or on
+      // however a future Supabase query happens to return rows
+      .slice()
+      .sort((a, b) => a.sort_order - b.sort_order);
+    for (const p of ordered) {
       napkins.push({
         slug: p.slug,
         title: p.title,
@@ -132,7 +164,7 @@ export async function getPlaygroundNapkins(): Promise<NapkinMeta[]> {
       });
     }
   }
-  napkins.sort((a, b) => fnv1a("order" + a.slug) - fnv1a("order" + b.slug));
+  napkins.sort((a, b) => a.issue_number - b.issue_number);
   assignFieldPositions(napkins);
   return napkins;
 }

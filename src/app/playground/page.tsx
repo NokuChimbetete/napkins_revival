@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Averia_Serif_Libre, Inter, Lora } from "next/font/google";
-import { getPieceForPlayground, getPlaygroundNapkins } from "@/lib/playground";
+import { fieldSizeFor, getPieceForPlayground, getPlaygroundNapkins } from "@/lib/playground";
 import { NapkinsDrawer } from "@/components/playground/NapkinsDrawer";
 
 // the modal reuses the reader's EntrySection, whose CSS consumes these vars
@@ -30,7 +30,11 @@ export default async function PlaygroundPage({ searchParams }: Props) {
 
   return (
     <div className={`${averia.variable} ${inter.variable} ${lora.variable}`}>
-      <NapkinsDrawer napkins={napkins} initialPiece={initialPiece} />
+      <NapkinsDrawer
+        napkins={napkins}
+        initialPiece={initialPiece}
+        field={fieldSizeFor(napkins.length)}
+      />
     </div>
   );
 }

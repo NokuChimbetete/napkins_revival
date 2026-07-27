@@ -42,18 +42,20 @@
 
 /* coordinate frame for the napkins' % positions — never transformed itself;
    the pan loop moves each napkin (torus-wrapped + parallax) individually */
+/* sized from the piece count by fieldSizeFor(); the custom properties are set
+   inline by NapkinsDrawer so the box and the pan engine can't drift apart */
 .field {
   position: absolute;
   top: 0;
   left: 0;
-  width: 4440px;  /* must match FIELD in NapkinsDrawer */
-  height: 4340px;
+  width: var(--field-w);
+  height: var(--field-h);
 }
 
 @media (max-width: 700px) {
   .field {
-    width: 3300px;
-    height: 3200px;
+    width: var(--field-w-mobile);
+    height: var(--field-h-mobile);
   }
 }
 

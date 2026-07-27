@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
-import type { NapkinMeta, PlaygroundPiece } from "@/lib/playground";
+import type { FieldSize, NapkinMeta, PlaygroundPiece } from "@/lib/playground";
 import { NAPKIN_FONTS } from "@/app/playground/fonts";
 import { Napkin } from "./Napkin";
 import { NapkinSearch } from "./NapkinSearch";
@@ -42,8 +42,9 @@ const PARALLAX_CHILD = 1;
 /** must equal the CSS background-size of .wood */
 const WOOD_TILE = 512;
 
-/** field dimensions must match the CSS spot percentages' frame of reference */
-const FIELD = { desktop: { w: 4440, h: 4340 }, mobile: { w: 3300, h: 3200 } };
+// The field's dimensions come from fieldSizeFor() via props — one source of
+// truth shared by the CSS box and this engine's wrap period. They must agree
+// exactly or the infinite wrap tears (napkins jump, or double up on screen).
 
 const urlFor = (slug?: string | null) =>
   slug ? `/playground?piece=${encodeURIComponent(slug)}` : "/playground";
@@ -78,9 +79,11 @@ type ItemState = {
 export function NapkinsDrawer({
   napkins,
   initialPiece,
+  field,
 }: {
   napkins: NapkinMeta[];
   initialPiece: PlaygroundPiece | null;
+  field: FieldSize;
 }) {
   const [openPiece, setOpenPiece] = useState<PlaygroundPiece | null>(initialPiece);
   const [openSlug, setOpenSlug] = useState<string | null>(initialPiece?.entry.slug ?? null);
@@ -103,7 +106,7 @@ export function NapkinsDrawer({
   const mouseT = useRef({ x: 0.5, y: 0.5 });
   const mouseC = useRef({ x: 0.5, y: 0.5 });
   const items = useRef<ItemState[]>([]);
-  const fieldSize = useRef(FIELD.desktop);
+  const fieldSize = useRef(field.desktop);
   const rafId = useRef(0);
   const drag = useRef<{
     id: number;
@@ -131,8 +134,8 @@ export function NapkinsDrawer({
     const vp = viewportRef.current;
     if (!vp) return;
     fieldSize.current = window.matchMedia("(max-width: 700px)").matches
-      ? FIELD.mobile
-      : FIELD.desktop;
+      ? field.mobile
+      : field.desktop;
     const list: ItemState[] = [];
     for (const n of napkins) {
       const el = napkinNode(n.slug);
@@ -148,7 +151,7 @@ export function NapkinsDrawer({
       });
     }
     items.current = list;
-  }, [napkins]);
+  }, [napkins, field]);
 
   // ---- the frame, ported verbatim ---------------------------------------
 
@@ -567,7 +570,18 @@ export function NapkinsDrawer({
     <main className={styles.page}>
       <div ref={viewportRef} className={styles.viewport}>
         <div ref={woodRef} className={styles.wood} aria-hidden="true" />
-        <div ref={fieldRef} className={styles.field}>
+        <div
+          ref={fieldRef}
+          className={styles.field}
+          style={
+            {
+              "--field-w": `${field.desktop.w}px`,
+              "--field-h": `${field.desktop.h}px`,
+              "--field-w-mobile": `${field.mobile.w}px`,
+              "--field-h-mobile": `${field.mobile.h}px`,
+            } as React.CSSProperties
+          }
+        >
           {napkins.map((n) => (
             <Napkin
               key={n.slug}
