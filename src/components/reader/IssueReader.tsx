@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import type { Issue } from "@/lib/types";
 import type { IssueContent } from "@/lib/issue-content";
 import { EntrySection } from "./EntrySection";
+import { IssueToc } from "./IssueToc";
+import { flyTo } from "./fly-to";
 import styles from "./reader.module.css";
 
 export function IssueReader({ issue, content }: { issue: Issue; content: IssueContent }) {
@@ -46,12 +48,39 @@ export function IssueReader({ issue, content }: { issue: Issue; content: IssueCo
     return () => observer.disconnect();
   }, []);
 
-  const jumpTo = (slug: string) => {
+  const cancelFlight = useRef<(() => void) | null>(null);
+
+  /**
+   * Fly to a piece. flyTo() re-measures the target every frame, which is what
+   * makes a smooth scroll survive images loading in on the way past — the
+   * reason this used to be an instant jump.
+   *
+   * On arrival the piece announces itself: a quick lift on the title and the
+   * orange rule drawing itself underneath. It's a beat, not a wait.
+   */
+  const goToPiece = useCallback((slug: string) => {
+    const target = document.getElementById(slug);
+    if (!target) return;
     setTocOpen(false);
-    // instant jump: smooth scrolling gets cancelled by lazy-image layout shifts
-    // over multi-thousand-pixel distances, and is disorienting at this scale anyway
-    document.getElementById(slug)?.scrollIntoView({ block: "start" });
-  };
+    cancelFlight.current?.();
+    // claim the marker straight away: waiting for the scrollspy to catch up
+    // mid-flight would leave the click feeling unacknowledged
+    setActiveSlug(slug);
+
+    // clear any previous flourish so re-picking the same piece replays it
+    document
+      .querySelectorAll("[data-landed]")
+      .forEach((el) => el.removeAttribute("data-landed"));
+
+    cancelFlight.current = flyTo(target, {
+      onArrive: () => {
+        target.setAttribute("data-landed", "");
+        window.setTimeout(() => target.removeAttribute("data-landed"), 1200);
+      },
+    });
+  }, []);
+
+  useEffect(() => () => cancelFlight.current?.(), []);
 
   return (
     <div className={styles.page}>
@@ -67,7 +96,13 @@ export function IssueReader({ issue, content }: { issue: Issue; content: IssueCo
             {issue.title} — Napkins
           </span>
           <span className={styles.barActions}>
-            <button type="button" className={styles.barButton} onClick={() => setTocOpen(true)}>
+            {/* the rail is permanent on wide screens; this opens it as a panel below that */}
+            <button
+              type="button"
+              className={`${styles.barButton} ${styles.tocTrigger}`}
+              onClick={() => setTocOpen(true)}
+              aria-expanded={tocOpen}
+            >
               Contents
             </button>
             {hasPdf && (
@@ -79,34 +114,14 @@ export function IssueReader({ issue, content }: { issue: Issue; content: IssueCo
         </div>
       </div>
 
-      {tocOpen && (
-        <>
-          <div className={styles.drawerBackdrop} onClick={() => setTocOpen(false)} />
-          <nav className={styles.drawer} aria-label="Issue contents">
-            <div className={styles.drawerHead}>
-              <span className={styles.drawerTitle}>In this issue</span>
-              <button type="button" className={styles.barButton} onClick={() => setTocOpen(false)}>
-                Close
-              </button>
-            </div>
-            {content.pieces.map((p) => (
-              <button
-                key={p.slug}
-                type="button"
-                className={`${styles.drawerItem}${p.slug === activeSlug ? ` ${styles.drawerItemActive}` : ""}`}
-                onClick={() => jumpTo(p.slug)}
-              >
-                <span className={styles.drawerItemTitle}>{p.title}</span>
-                <span className={styles.drawerItemMeta}>
-                  {[p.author_name && `${p.author_name}${p.class_year ? ` (${p.class_year})` : ""}`, p.category]
-                    .filter(Boolean)
-                    .join(" · ")}
-                </span>
-              </button>
-            ))}
-          </nav>
-        </>
-      )}
+      <IssueToc
+        items={content.pieces.map((p) => ({ slug: p.slug, title: p.title }))}
+        activeSlug={activeSlug}
+        open={tocOpen}
+        onClose={() => setTocOpen(false)}
+        onToggle={() => setTocOpen((v) => !v)}
+        onNavigate={goToPiece}
+      />
 
       <header className={styles.hero}>
         <p className={styles.heroIssueNo}>Napkins · Issue {issue.issue_number}</p>
