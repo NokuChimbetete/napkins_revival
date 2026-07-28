@@ -4,7 +4,7 @@
   /* the site is always light — block browser auto-darkening */
   color-scheme: light;
   color-scheme: only light;
-  --background: #f7e8c8;
+  --background: #ffffff;
   --foreground: #1b1b1b;
 }
 
