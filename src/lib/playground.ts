@@ -1,5 +1,7 @@
-import { getIssueContent, type Entry } from "@/lib/issue-content";
+import { getIssueContent, rowToEntry, PIECE_COLUMNS, type Entry } from "@/lib/issue-content";
 import { getIssues } from "@/lib/issues";
+import { createClient } from "@/lib/supabase/server";
+import { supabaseConfigured } from "@/lib/supabase/configured";
 
 /**
  * The Napkins Drawer: every creative piece ever published, as a napkin.
@@ -12,8 +14,6 @@ import { getIssues } from "@/lib/issues";
  */
 
 import { FONT_PRESET_COUNT, PAPER_COUNT } from "@/lib/napkin-constants";
-
-const ISSUE_NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8];
 
 export type NapkinLook = {
   /** 1-based paper index → /playground/papers/paper-N.webp */
@@ -127,50 +127,134 @@ function assignFieldPositions(napkins: NapkinMeta[]) {
   });
 }
 
-const isCreative = (p: Entry) => p.category !== "Introduction";
+/** Front matter (forewords, editors' notes) is read inside the issue, not put
+ *  on the table. Driven by a real column so it survives an editor typing
+ *  "Foreword" or "Editor's Note" instead of the exact category we once matched. */
+const isCreative = (p: Entry) => !p.is_frontmatter;
 
+/** Issues come from the issues table (sorted by number), so publishing a new
+ *  one needs no code change — it simply appears on the next page load. */
 async function loadAll(): Promise<{ content: { pieces: Entry[] }; issue_number: number; season: string }[]> {
-  const seasons = new Map((await getIssues()).map((i) => [i.issue_number, i.title]));
+  const issues = await getIssues();
   const all = [];
-  for (const n of ISSUE_NUMBERS) {
-    const content = await getIssueContent(n);
-    if (content) all.push({ content, issue_number: n, season: seasons.get(n) ?? `Issue ${n}` });
+  for (const issue of issues) {
+    const content = await getIssueContent(issue.issue_number);
+    if (content) {
+      all.push({
+        content,
+        issue_number: issue.issue_number,
+        season: issue.title || `Issue ${issue.issue_number}`,
+      });
+    }
   }
   return all;
 }
 
-/** Every creative piece (Forewords excluded), laid out in print order so the
- *  table reads oldest-at-the-top and new issues only ever extend it downward.
- *  ~15KB of metadata — piece bodies stay on the server until a napkin opens. */
-export async function getPlaygroundNapkins(): Promise<NapkinMeta[]> {
-  const napkins: NapkinMeta[] = [];
-  for (const { content, issue_number, season } of await loadAll()) {
-    const ordered = content.pieces
-      .filter(isCreative)
-      // sort explicitly: seating must not depend on fixture key order or on
-      // however a future Supabase query happens to return rows
-      .slice()
-      .sort((a, b) => a.sort_order - b.sort_order);
-    for (const p of ordered) {
-      napkins.push({
-        slug: p.slug,
-        title: p.title,
-        author_name: p.author_name,
-        class_year: p.class_year,
-        category: p.category,
-        issue_number,
-        season,
-        look: napkinLook(p),
-      });
-    }
-  }
-  napkins.sort((a, b) => a.issue_number - b.issue_number);
+/** Seat rows that are already in print order, then hand back the napkins.
+ *  Shared by both data paths so seating can never differ between them. */
+function seat(
+  rows: { entry: Pick<Entry, "slug" | "title" | "author_name" | "class_year" | "category" | "napkin_variant" | "font_preset">; issue_number: number; season: string }[]
+): NapkinMeta[] {
+  const napkins = rows.map(({ entry, issue_number, season }) => ({
+    slug: entry.slug,
+    title: entry.title,
+    author_name: entry.author_name,
+    class_year: entry.class_year,
+    category: entry.category,
+    issue_number,
+    season,
+    look: napkinLook(entry),
+  }));
   assignFieldPositions(napkins);
   return napkins;
 }
 
-/** Full piece for the modal (slugs are unique across all issues). */
+/** Every creative piece (front matter excluded), laid out in print order so the
+ *  table reads oldest-at-the-top and new issues only ever extend it downward.
+ *  ~15KB of metadata — piece bodies stay on the server until a napkin opens. */
+export async function getPlaygroundNapkins(): Promise<NapkinMeta[]> {
+  if (supabaseConfigured()) {
+    try {
+      const supabase = await createClient();
+      // ONE query for the whole table. Deliberately no body_html: it is ~95% of
+      // the row and never shown on a napkin — fetching it here was pulling
+      // ~800KB to render ~15KB of metadata.
+      const { data, error } = await supabase
+        .from("pieces")
+        .select(
+          "slug, title, author_name, class_year, category, sort_order, napkin_variant, font_preset, issues!inner(issue_number, title)"
+        )
+        .eq("is_frontmatter", false);
+      if (!error && data?.length) {
+        type Row = (typeof data)[number] & { issues: { issue_number: number; title: string } | { issue_number: number; title: string }[] };
+        const rows = (data as unknown as Row[]).map((r) => {
+          const iss = Array.isArray(r.issues) ? r.issues[0] : r.issues;
+          return {
+            entry: r as unknown as Entry,
+            issue_number: iss.issue_number,
+            season: iss.title || `Issue ${iss.issue_number}`,
+          };
+        });
+        // sort here rather than in SQL: ordering by an embedded table is
+        // awkward in PostgREST, and 117 rows is nothing. Print order =
+        // issue number, then the piece's place within its issue.
+        rows.sort(
+          (a, b) =>
+            a.issue_number - b.issue_number ||
+            (a.entry.sort_order ?? 0) - (b.entry.sort_order ?? 0)
+        );
+        return seat(rows);
+      }
+    } catch {
+      // fall through to fixtures
+    }
+  }
+
+  const rows = [];
+  for (const { content, issue_number, season } of await loadAll()) {
+    const ordered = content.pieces
+      .filter(isCreative)
+      // sort explicitly: seating must not depend on fixture key order
+      .slice()
+      .sort((a, b) => a.sort_order - b.sort_order);
+    for (const entry of ordered) rows.push({ entry, issue_number, season });
+  }
+  rows.sort((a, b) => a.issue_number - b.issue_number);
+  return seat(rows);
+}
+
+/** Full piece for the modal (slugs are unique across all issues).
+ *
+ *  This runs on every napkin click, so it is a single indexed lookup. It used
+ *  to walk every issue — 17 queries and ~800KB — to find one row, which left
+ *  the napkin sitting flipped for over a second after the 420ms flight. */
 export async function getPieceForPlayground(slug: string): Promise<PlaygroundPiece | null> {
+  if (supabaseConfigured()) {
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase
+        .from("pieces")
+        .select(`${PIECE_COLUMNS}, issues!inner(issue_number, title)`)
+        .eq("slug", slug)
+        .eq("is_frontmatter", false)
+        .maybeSingle();
+      if (!error && data) {
+        const row = data as unknown as Record<string, unknown> & {
+          issues: { issue_number: number; title: string } | { issue_number: number; title: string }[];
+        };
+        const iss = Array.isArray(row.issues) ? row.issues[0] : row.issues;
+        return {
+          entry: rowToEntry(row),
+          issue_number: iss.issue_number,
+          season: iss.title || `Issue ${iss.issue_number}`,
+        };
+      }
+      if (!error) return null; // genuinely absent, don't scan the fixtures
+    } catch {
+      // fall through to fixtures
+    }
+  }
+
   for (const { content, issue_number, season } of await loadAll()) {
     const entry = content.pieces.find((p) => p.slug === slug && isCreative(p));
     if (entry) return { entry, issue_number, season };

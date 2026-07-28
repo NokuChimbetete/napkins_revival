@@ -1,4 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
+import { supabaseConfigured } from "@/lib/supabase/configured";
+import { optimizeBodyImages } from "@/lib/optimize-body-images";
 import issue1 from "@/lib/fixtures/issue-1.json";
 import issue2 from "@/lib/fixtures/issue-2.json";
 import issue3 from "@/lib/fixtures/issue-3.json";
@@ -22,6 +24,8 @@ export type Entry = {
   images: string[];
   /** force verse treatment (no-wrap, wider measure) even when category isn't "poetry" */
   verse?: boolean;
+  /** front matter (foreword, editor's note) — read in the issue, not on the drawer */
+  is_frontmatter?: boolean;
   sort_order: number;
   /** explicit napkin pairing from the DB; when absent the playground derives
    *  both deterministically from the slug (hash % count) */
@@ -47,7 +51,9 @@ function normalize(fixture: unknown): IssueContent {
       images: p.images ?? [],
       galleries: p.galleries ?? [],
       verse: p.verse ?? false,
-      body_html: p.body_html ?? null,
+      // fixtures predate the flag; "Introduction" was the old magic string
+      is_frontmatter: p.is_frontmatter ?? p.category === "Introduction",
+      body_html: optimizeBodyImages(p.body_html ?? null),
     })),
     page_images: f.page_images ?? [],
     pdf_download: f.pdf_download ?? null,
@@ -66,13 +72,35 @@ const FIXTURES: Record<number, IssueContent> = {
   8: normalize(issue8),
 };
 
-const slugify = (s: string) =>
-  s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+/** Columns the reader needs. Listed explicitly so a `select *` can't quietly
+ *  start shipping a future large column to every page. */
+export const PIECE_COLUMNS =
+  "slug, title, author_name, class_year, category, body, body_html, galleries, images, verse, is_frontmatter, sort_order, napkin_variant, font_preset";
 
-function supabaseConfigured() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  return Boolean(url && key && !url.includes("your-project-ref") && !key.startsWith("your-"));
+/** One place that turns a `pieces` row into an Entry, so every query path —
+ *  whole issue, single piece, napkin metadata — maps identically. */
+export function rowToEntry(p: Record<string, unknown>, fallbackOrder = 0): Entry {
+  return {
+    // stored, never derived: the slug is baked into shared links and into the
+    // napkin's paper/font/position (see 0003_playground.sql)
+    slug: p.slug as string,
+    title: p.title as string,
+    author_name: (p.author_name as string) ?? "",
+    class_year: (p.class_year as string) ?? "",
+    category: (p.category as string) ?? null,
+    body: (p.body as string) ?? null,
+    // artwork is routed through the image optimizer here so it happens once,
+    // server-side, and travels with the JSON the napkin modal fetches
+    body_html: optimizeBodyImages((p.body_html as string) ?? null),
+    galleries: (p.galleries as string[][]) ?? [],
+    images: (p.images as string[]) ?? [],
+    verse: (p.verse as boolean) ?? false,
+    is_frontmatter: (p.is_frontmatter as boolean) ?? false,
+    sort_order: (p.sort_order as number) ?? fallbackOrder,
+    // NULL means "derive from the slug" — a value is a deliberate override
+    napkin_variant: (p.napkin_variant as number) ?? null,
+    font_preset: (p.font_preset as number) ?? null,
+  };
 }
 
 export async function getIssueContent(issueNumber: number): Promise<IssueContent | null> {
@@ -87,27 +115,14 @@ export async function getIssueContent(issueNumber: number): Promise<IssueContent
       if (issue) {
         const { data: pieces } = await supabase
           .from("pieces")
-          .select("*")
+          .select(PIECE_COLUMNS)
           .eq("issue_id", issue.id)
           .order("sort_order", { ascending: true });
         if (pieces?.length || (issue.page_images as string[])?.length) {
           return {
             issue_number: issueNumber,
             credits: issue.credits ?? null,
-            pieces: (pieces ?? []).map((p, i) => ({
-              slug: slugify(p.title),
-              title: p.title,
-              author_name: p.author_first_name,
-              class_year: p.class_year,
-              category: p.category ?? null,
-              body: p.body ?? null,
-              body_html: p.body_html ?? null,
-              galleries: (p.galleries as string[][]) ?? [],
-              images: (p.images as string[]) ?? [],
-              sort_order: p.sort_order ?? i,
-              napkin_variant: p.napkin_variant ?? null,
-              font_preset: p.font_preset ?? null,
-            })),
+            pieces: (pieces ?? []).map((p, i) => rowToEntry(p, i)),
             page_images: (issue.page_images as string[]) ?? [],
             pdf_download: issue.pdf_url || null,
           };
