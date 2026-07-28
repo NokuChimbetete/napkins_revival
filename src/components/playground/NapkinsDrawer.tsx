@@ -391,15 +391,39 @@ export function NapkinsDrawer({
 
   // ---- open / close with the flight ------------------------------------
 
+  // in-flight requests, so hover + pointerdown + click don't fire three fetches
+  const inflight = useRef(new Map<string, Promise<PlaygroundPiece>>());
+
   const fetchPiece = useCallback(async (slug: string): Promise<PlaygroundPiece> => {
     const cached = cache.current.get(slug);
     if (cached) return cached;
-    const res = await fetch(`/playground/piece/${encodeURIComponent(slug)}`);
-    if (!res.ok) throw new Error(`piece fetch failed: ${res.status}`);
-    const piece = (await res.json()) as PlaygroundPiece;
+    const pending = inflight.current.get(slug);
+    if (pending) return pending;
+    const req = (async () => {
+      const res = await fetch(`/playground/piece/${encodeURIComponent(slug)}`);
+      if (!res.ok) throw new Error(`piece fetch failed: ${res.status}`);
+      return (await res.json()) as PlaygroundPiece;
+    })();
+    inflight.current.set(slug, req);
+    let piece: PlaygroundPiece;
+    try {
+      piece = await req;
+    } finally {
+      inflight.current.delete(slug);
+    }
     cache.current.set(slug, piece);
     return piece;
   }, []);
+
+  /** Warm a piece on hover/pointerdown/focus. Fire-and-forget: a failed
+   *  prefetch must stay invisible — the click will just fetch it again. */
+  const prefetchPiece = useCallback(
+    (slug: string) => {
+      if (cache.current.has(slug) || inflight.current.has(slug)) return;
+      void fetchPiece(slug).catch(() => {});
+    },
+    [fetchPiece]
+  );
 
   /** fixed-position copy of the napkin that can fly above the panning field */
   const buildFlight = useCallback(
@@ -588,6 +612,7 @@ export function NapkinsDrawer({
               napkin={n}
               fontFamily={NAPKIN_FONTS[n.look.fontPreset - 1].family}
               onOpen={openNapkin}
+              onPrefetch={prefetchPiece}
             />
           ))}
         </div>
