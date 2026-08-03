@@ -2,7 +2,26 @@ import Link from "next/link";
 import styles from "./landing.module.css";
 import type { CSSProperties } from "react";
 
-type NoteVars = CSSProperties & { "--rot": string; "--rot-hover": string };
+/**
+ * Three notes taped to the inspiration wall.
+ *
+ * Every measurement here is either a custom property or an em:
+ *  - --lift / --shift carry the desktop stagger (how far up the wall a note
+ *    sits, and how far it slides off the row). The phone breakpoint stops
+ *    consuming them and stacks the notes instead. They have to be properties
+ *    rather than inline margin/left, because an inline declaration would
+ *    outrank the media query.
+ *  - tape geometry is in em off .sticky's font-size, so changing that one
+ *    number rescales the note, its tape and its shadow together, keeping the
+ *    tuned proportions exactly. At the desktop's 30px these resolve to the
+ *    original pixel values.
+ */
+type NoteVars = CSSProperties & {
+  "--rot": string;
+  "--rot-hover": string;
+  "--lift"?: string;
+  "--shift"?: string;
+};
 
 export function StickyNotes() {
   return (
@@ -10,7 +29,7 @@ export function StickyNotes() {
       <a
         href="/Submit-to-the-Magazine"
         className={styles.sticky}
-        style={{ marginBottom: 430, "--rot": "-4deg", "--rot-hover": "-1deg" } as NoteVars}
+        style={{ "--lift": "430px", "--rot": "-4deg", "--rot-hover": "-1deg" } as NoteVars}
       >
         <span
           className={styles.stickyFace}
@@ -24,14 +43,27 @@ export function StickyNotes() {
           <br />
           Your Artwork
         </span>
-        <span className={styles.tape} style={{ top: -11, left: -26, width: 78, height: 24, transform: "rotate(-38deg)" }} />
-        <span className={styles.tape} style={{ top: -9, right: -24, width: 78, height: 24, transform: "rotate(35deg)" }} />
+        <span
+          className={styles.tape}
+          style={{ top: "-0.3667em", left: "-0.8667em", width: "2.6em", height: "0.8em", transform: "rotate(-38deg)" }}
+        />
+        <span
+          className={styles.tape}
+          style={{ top: "-0.3em", right: "-0.8em", width: "2.6em", height: "0.8em", transform: "rotate(35deg)" }}
+        />
       </a>
 
       <Link
         href="/playground"
         className={styles.sticky}
-        style={{ left: -150, marginBottom: 235, "--rot": "2.5deg", "--rot-hover": "0.5deg" } as NoteVars}
+        style={
+          {
+            "--shift": "-150px",
+            "--lift": "235px",
+            "--rot": "2.5deg",
+            "--rot-hover": "0.5deg",
+          } as NoteVars
+        }
       >
         <span
           className={styles.stickyFace}
@@ -45,13 +77,16 @@ export function StickyNotes() {
           <br />
           Drawer
         </span>
-        <span className={styles.tape} style={{ top: -13, left: "50%", marginLeft: -48, width: 96, height: 26, transform: "rotate(-3deg)" }} />
+        <span
+          className={styles.tape}
+          style={{ top: "-0.4333em", left: "50%", marginLeft: "-1.6em", width: "3.2em", height: "0.8667em", transform: "rotate(-3deg)" }}
+        />
       </Link>
 
       <a
         href="/Join-the-Team"
         className={styles.sticky}
-        style={{ marginBottom: 36, "--rot": "-2.5deg", "--rot-hover": "1deg" } as NoteVars}
+        style={{ "--lift": "36px", "--rot": "-2.5deg", "--rot-hover": "1deg" } as NoteVars}
       >
         <span
           className={styles.stickyFace}
@@ -65,8 +100,14 @@ export function StickyNotes() {
           <br />
           Team :)
         </span>
-        <span className={styles.tape} style={{ top: -10, left: -25, width: 78, height: 24, transform: "rotate(-42deg)" }} />
-        <span className={styles.tape} style={{ top: -8, right: -23, width: 78, height: 24, transform: "rotate(38deg)" }} />
+        <span
+          className={styles.tape}
+          style={{ top: "-0.3333em", left: "-0.8333em", width: "2.6em", height: "0.8em", transform: "rotate(-42deg)" }}
+        />
+        <span
+          className={styles.tape}
+          style={{ top: "-0.2667em", right: "-0.7667em", width: "2.6em", height: "0.8em", transform: "rotate(38deg)" }}
+        />
       </a>
     </div>
   );

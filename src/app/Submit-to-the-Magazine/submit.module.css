@@ -142,3 +142,63 @@
 .instaRow a:hover {
   color: #0071ad;
 }
+
+/* ---- responsive ----------------------------------------------------------
+   The desktop measure (800px column, hung off a 10vw left margin) is left as
+   is. These blocks only pull the gutters in, let the four-item nav wrap, and
+   bring the display title down to something a phone can hold on one screen. */
+
+@media (max-width: 900px) {
+  .topBar {
+    padding: 28px 28px 0 24px;
+  }
+
+  .nav {
+    gap: 22px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .instaRow {
+    padding: 56px 28px 0;
+  }
+}
+
+@media (max-width: 700px) {
+  .topBar {
+    padding: 18px 16px 0;
+    gap: 16px;
+  }
+
+  /* tight enough that the four links clear the logo on one row, which buys
+     the vertical room to pad them out to a thumb-sized target */
+  .nav {
+    gap: 2px 8px;
+    padding-top: 0;
+  }
+
+  .navLink {
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    padding: 14px 3px;
+  }
+
+  /* even gutters, rather than the desktop's 10vw hang and 24px right pad */
+  .content {
+    margin-left: 18px;
+    padding: 18px 18px 0 0;
+  }
+
+  .title {
+    font-size: 34px;
+    margin: 6px 0 16px;
+  }
+
+  .sectionHead {
+    margin: 36px 0 12px;
+  }
+
+  .instaRow {
+    padding: 40px 18px 0;
+  }
+}

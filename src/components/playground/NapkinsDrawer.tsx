@@ -35,6 +35,24 @@ const FLIGHT_MS = 420;
 // the reference default is 0.4; nudged up on request — drag stays at hers
 const SCROLL_SPEED = 0.55;
 const DRAG_SPEED = 0.5;
+/**
+ * Touch drags 1:1. The reference's 0.5 is a damped feel tuned for a mouse,
+ * where the cursor is a pointer at the table rather than a hand on it — under
+ * a thumb the same number reads as the table refusing to keep up, and it takes
+ * three swipes to cross what one should.
+ */
+const TOUCH_DRAG_SPEED = 1;
+/**
+ * A flick coasts. Velocity is px/ms, so a brisk ~2px/ms throw adds ~500px of
+ * travel, which the position lerp then eases out — the reference has no throw
+ * because a mouse can just keep dragging; a thumb runs out of screen.
+ */
+const TOUCH_FLING = 260;
+/** ceiling on the flick velocity fed to the fling, so a stray fast sample
+ *  can't launch the table halfway across the field */
+const TOUCH_FLING_MAX_V = 3.5;
+/** px of travel before a press counts as a drag rather than a tap */
+const DRAG_THRESHOLD = 4;
 const EASE = 0.067; // je(0.3) in the source: 0..1 mapped onto 0.01..0.2
 const SMOOTH = 0.04;
 const PARALLAX_GENERAL = 1;
@@ -110,12 +128,19 @@ export function NapkinsDrawer({
   const rafId = useRef(0);
   const drag = useRef<{
     id: number;
+    touch: boolean;
     startX: number;
     startY: number;
     scrollX: number;
     scrollY: number;
     moved: number;
     captured: boolean;
+    /** smoothed pointer velocity in px/ms, for the release fling */
+    vx: number;
+    vy: number;
+    lastX: number;
+    lastY: number;
+    lastT: number;
   } | null>(null);
   const hovered = useRef<ItemState | null>(null);
   const suppressClickUntil = useRef(0);
@@ -266,49 +291,103 @@ export function NapkinsDrawer({
       if (e.pointerType === "mouse" && e.button !== 0) return;
       drag.current = {
         id: e.pointerId,
+        touch: e.pointerType === "touch",
         startX: e.clientX,
         startY: e.clientY,
         scrollX: target.current.x,
         scrollY: target.current.y,
         moved: 0,
         captured: false,
+        vx: 0,
+        vy: 0,
+        lastX: e.clientX,
+        lastY: e.clientY,
+        lastT: e.timeStamp || performance.now(),
       };
     };
     const onMove = (e: PointerEvent) => {
       const d = drag.current;
       if (!d || e.pointerId !== d.id) return;
+      // the modal used to block these by sitting in the top layer above the
+      // viewport; now that the listener is on the window it has to say no
+      if (openPiece) return;
       const dx = e.clientX - d.startX;
       const dy = e.clientY - d.startY;
       d.moved = Math.max(d.moved, Math.hypot(dx, dy));
-      // capture only once it's clearly a drag — capturing on pointerdown
-      // would retarget pointerup to the viewport and swallow napkin clicks
-      if (!d.captured && d.moved > 4) {
+      // Claim the drag once it's clearly a drag — not on pointerdown, which
+      // would retarget pointerup to the viewport and swallow napkin clicks.
+      //
+      // A mouse needs the explicit capture to keep sending moves once the
+      // cursor leaves the viewport. A touch pointer does NOT: the browser
+      // already implicitly captured it to whichever napkin was under the
+      // finger. Transferring that capture here is the fragile step — WebKit
+      // can drop the move stream outright, and the captured napkin is one the
+      // pan loop is moving under content-visibility: auto, so its rendering
+      // can be skipped mid-drag. Either way the drag dies about 4px in, which
+      // looks exactly like the table being frozen. Leave touch alone.
+      if (!d.captured && d.moved > DRAG_THRESHOLD) {
         d.captured = true;
-        vp.setPointerCapture(d.id);
+        if (e.pointerType !== "touch") {
+          // a nicety for the mouse, not the mechanism — the window listeners
+          // are what actually keep the drag alive, so a refusal is survivable
+          try {
+            vp.setPointerCapture(d.id);
+          } catch {}
+        }
         vp.classList.add(styles.grabbing);
         setHintGone(true);
       }
       if (!d.captured) return;
-      target.current.x = d.scrollX + dx * DRAG_SPEED;
-      target.current.y = d.scrollY + dy * DRAG_SPEED;
+
+      // running velocity for the release fling, smoothed so one jittery final
+      // sample can't decide the whole throw
+      const now = e.timeStamp || performance.now();
+      const dt = now - d.lastT;
+      if (dt > 0) {
+        d.vx = d.vx * 0.7 + ((e.clientX - d.lastX) / dt) * 0.3;
+        d.vy = d.vy * 0.7 + ((e.clientY - d.lastY) / dt) * 0.3;
+        d.lastX = e.clientX;
+        d.lastY = e.clientY;
+        d.lastT = now;
+      }
+
+      const speed = d.touch ? TOUCH_DRAG_SPEED : DRAG_SPEED;
+      target.current.x = d.scrollX + dx * speed;
+      target.current.y = d.scrollY + dy * speed;
     };
     const onUp = (e: PointerEvent) => {
       const d = drag.current;
       if (!d || e.pointerId !== d.id) return;
-      if (d.moved > 8) suppressClickUntil.current = performance.now() + 300;
+      // Same threshold as the drag itself. On a mouse the capture already
+      // swallowed the click; on touch there is no capture, so this is the only
+      // thing standing between a short drag and an accidentally opened napkin.
+      if (d.moved > DRAG_THRESHOLD) suppressClickUntil.current = performance.now() + 300;
+
+      // let a flick coast. Reduced motion keeps the lerp at k=1, where cur
+      // snaps straight to target — a fling there is a teleport, not a glide.
+      if (d.touch && d.captured && e.type === "pointerup" && !prefersReducedMotion()) {
+        const clamp = (v: number) =>
+          Math.max(-TOUCH_FLING_MAX_V, Math.min(TOUCH_FLING_MAX_V, v));
+        target.current.x += clamp(d.vx) * TOUCH_FLING;
+        target.current.y += clamp(d.vy) * TOUCH_FLING;
+      }
+
       drag.current = null;
       vp.classList.remove(styles.grabbing);
     };
 
+    // Down starts on the canvas, so a drag can only begin on the table. Move
+    // and up listen on the window: they arrive regardless of which element
+    // holds the pointer capture, or whether it was lost.
     vp.addEventListener("pointerdown", onDown);
-    vp.addEventListener("pointermove", onMove);
-    vp.addEventListener("pointerup", onUp);
-    vp.addEventListener("pointercancel", onUp);
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
     return () => {
       vp.removeEventListener("pointerdown", onDown);
-      vp.removeEventListener("pointermove", onMove);
-      vp.removeEventListener("pointerup", onUp);
-      vp.removeEventListener("pointercancel", onUp);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
     };
   }, [openPiece]);
 
@@ -634,7 +713,10 @@ export function NapkinsDrawer({
       </header>
 
       <div className={`${styles.hint}${hintGone ? ` ${styles.hintGone}` : ""}`} aria-hidden="true">
-        <span className={styles.hintGlyph}>✥</span> scroll / drag to move
+        <span className={styles.hintGlyph}>✥</span>
+        {/* a phone has no scroll wheel; the CSS picks the wording by pointer type */}
+        <span className={styles.hintPointer}>scroll / drag to move</span>
+        <span className={styles.hintTouch}>drag to move</span>
       </div>
 
       {error && (
