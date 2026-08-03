@@ -157,6 +157,10 @@
   white-space: nowrap;
   overflow-x: auto;
   padding-bottom: 4px;
+  /* on a phone this scroller is often the widest thing on screen, so reaching
+     the end of a long line would otherwise hand the gesture to the browser's
+     back-swipe and navigate away mid-poem */
+  overscroll-behavior-x: contain;
 }
 
 .poetry .bodyHtml :global(.row),
@@ -955,7 +959,8 @@
   }
   .tocItem {
     font-size: 14px;
-    padding: 9px 0;
+    /* 14px × 1.45 line-height + 24px = a 44px row you can hit with a thumb */
+    padding: 12px 0;
   }
 }
 
@@ -1016,6 +1021,71 @@
   background: #e2622b;
   transform-origin: left center;
   animation: landRule 1000ms cubic-bezier(0.22, 0.61, 0.36, 1) 140ms both;
+}
+
+/* ---- phone ---------------------------------------------------------------
+   The reader was already fluid; what it lacked was thumb-sized targets in the
+   sticky bar and slightly tighter gutters. The type sizes barely move — the
+   measure is the point of this page. */
+
+@media (max-width: 700px) {
+  /* the row's own padding goes; the 44px targets now set the bar's height,
+     which comes out shorter than the 9px-padded version it replaces */
+  .barRow {
+    padding: 0 14px;
+    gap: 10px;
+  }
+
+  .barLink,
+  .barButton {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  .barLink {
+    padding: 0 2px;
+  }
+
+  .barButton {
+    padding: 0 6px;
+  }
+
+  .barActions {
+    gap: 8px;
+  }
+
+  .pdfPill {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+  }
+
+  .entries {
+    padding: 10px 18px 40px;
+  }
+
+  .entryTitle {
+    font-size: 28px;
+  }
+
+  .heroLabel {
+    font-size: 25px;
+  }
+
+  .endCta {
+    padding: 30px 18px 56px;
+  }
+
+  .endCtaLinks {
+    gap: 20px;
+  }
+
+  .endCtaLink {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

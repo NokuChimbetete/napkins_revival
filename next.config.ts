@@ -1,6 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Next 16 refuses cross-origin requests to dev-only resources, and a phone
+  // opening the LAN address counts as cross-origin — it blocks /__nextjs_font
+  // and the HMR endpoint, so the site renders on a phone with the wrong fonts
+  // and no live reload. Dev-only setting; it has no effect on a build.
+  // Update the address if the machine's LAN IP changes (`npm run dev` prints it).
+  allowedDevOrigins: ["10.112.18.147", "10.112.18.*"],
   images: {
     // Next negotiates the best format the browser accepts, in this order.
     // AVIF is ~30–50% smaller than WebP on the collage and covers; anything

@@ -30,6 +30,7 @@ export function LandingHeader() {
           width={814}
           height={260}
           priority
+          sizes="(max-width: 700px) 86vw, (max-width: 1023px) 84vw, 940px"
           className={styles.titleImg}
         />
         <div className={styles.tagline}>

@@ -29,10 +29,20 @@ export function Bookshelf({ issues }: { issues: Issue[] }) {
       </svg>
       {singleShelf && (
         <>
-          <div className={styles.annotation} style={{ right: 128, top: -32, transform: "rotate(3deg)" }}>
+          <div
+            className={`${styles.annotation} ${styles.annotationEnd}`}
+            style={{ right: 128, top: -32, transform: "rotate(3deg)" }}
+          >
             our first ever!
           </div>
-          <svg className={styles.annotationArrow} style={{ right: 76, top: -22 }} width="48" height="44" viewBox="0 0 48 44" fill="none">
+          <svg
+            className={`${styles.annotationArrow} ${styles.annotationEnd}`}
+            style={{ right: 76, top: -22 }}
+            width="48"
+            height="44"
+            viewBox="0 0 48 44"
+            fill="none"
+          >
             <path d="M4 6 Q34 4 40 30" stroke="#b4470f" strokeWidth="2.5" strokeLinecap="round" fill="none" />
             <path d="M33 25 L41 32 L45 22" stroke="#b4470f" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
           </svg>
@@ -40,7 +50,9 @@ export function Bookshelf({ issues }: { issues: Issue[] }) {
       )}
 
       {shelves.map((shelf, s) => (
-        <div key={s} style={s > 0 ? { marginTop: 44 } : undefined}>
+        // below 700px this wrapper becomes the horizontal scroller, so the
+        // covers, the ledge bar and the labels all travel as one piece
+        <div key={s} className={styles.shelf} style={s > 0 ? { marginTop: 44 } : undefined}>
           <div className={styles.shelfGrid}>
             {shelf.map((issue) => {
               const isNewest = issue.issue_number === newestNumber;
@@ -55,7 +67,7 @@ export function Bookshelf({ issues }: { issues: Issue[] }) {
                     src={issue.cover_url}
                     alt={`Napkins Issue ${issue.issue_number} — ${issue.title} cover`}
                     fill
-                    sizes="(min-width: 1024px) 12vw, 25vw"
+                    sizes="(max-width: 700px) 150px, 12vw"
                     className={styles.coverImg}
                   />
                   {isNewest && <span className={styles.newSticker}>NEW!</span>}

@@ -70,6 +70,9 @@ export default function JoinTheTeamPage() {
           width={2304}
           height={1728}
           priority
+          // without this the fixed-width srcset makes a phone fetch the 3840px
+          // rendition for a 339px slot
+          sizes="(max-width: 700px) 92vw, (max-width: 900px) 88vw, 800px"
           className={styles.photo}
         />
 

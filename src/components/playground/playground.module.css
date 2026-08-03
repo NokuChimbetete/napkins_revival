@@ -467,6 +467,9 @@
 
 .modalInner {
   max-height: 86vh;
+  /* vh measures the viewport with the mobile toolbar retracted, so on a phone
+     86vh can be taller than what you can actually see; dvh tracks the real one */
+  max-height: 86dvh;
   overflow-y: auto;
   padding: 0 clamp(16px, 4vw, 44px) 1rem;
 }
@@ -525,6 +528,73 @@
   text-decoration: none;
   border-bottom: 1px solid currentColor;
   padding-bottom: 1px;
+}
+
+/* ————— touch ————— */
+
+/* the hint names the gesture you actually have */
+.hintTouch {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  .hintPointer {
+    display: none;
+  }
+
+  .hintTouch {
+    display: inline;
+  }
+
+  /* thumb-sized versions of the two controls small enough to miss */
+  .searchButton {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+
+  .modalClose {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+/* ————— phone ————— */
+
+@media (max-width: 700px) {
+  /* one tidy row across the top: back, title, search. The napkin count is
+     flavour and it's the piece that pushes this row past the screen edge. */
+  .overlay {
+    align-items: center;
+    gap: 0.5rem;
+    padding: max(0.7rem, env(safe-area-inset-top)) 0.8rem 0.7rem;
+  }
+
+  .backLink {
+    font-size: 11px;
+    letter-spacing: 1.4px;
+    padding: 8px 10px;
+  }
+
+  .overlayTitle {
+    font-size: 13px;
+    padding: 7px 10px;
+    white-space: nowrap;
+  }
+
+  .overlayCount {
+    display: none;
+  }
+
+  .search {
+    margin-left: auto;
+  }
+
+  .hint {
+    bottom: max(26px, env(safe-area-inset-bottom));
+    font-size: 12px;
+    letter-spacing: 1.2px;
+  }
 }
 
 /* ————— reduced motion ————— */

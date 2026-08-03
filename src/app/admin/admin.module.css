@@ -1,0 +1,92 @@
+.page {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  padding: 40px 24px;
+}
+
+/* ---- the gate -------------------------------------------------------------
+   One switch, one place. Above 900px the editor renders; below it, the note.
+   900px rather than a phone-sized number on purpose: a portrait tablet is not
+   a desk either, and a landscape iPad is the narrowest thing anyone should be
+   laying out an issue on.
+
+   This is a media query and not a JS width check so the server and the browser
+   agree on what to render — no flash of a dashboard the visitor is about to be
+   told they can't use, and no user-agent guessing. */
+
+.desk {
+  display: block;
+}
+
+.gate {
+  display: none;
+}
+
+@media (max-width: 899px) {
+  .desk {
+    display: none;
+  }
+
+  .gate {
+    display: block;
+  }
+}
+
+/* ---- placeholder until Phase 4 ---- */
+
+.stub {
+  color: #828282;
+  font-family: var(--font-geist-sans), Helvetica, Arial, sans-serif;
+  font-size: 15px;
+}
+
+/* ---- the note a phone gets ---- */
+
+.gate {
+  max-width: 30rem;
+}
+
+.mark {
+  display: block;
+  font-family: var(--font-archivo-black), sans-serif;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #e2622b;
+  margin-bottom: 14px;
+}
+
+.title {
+  font-family: var(--font-dm-serif), Georgia, serif;
+  font-weight: 400;
+  font-size: 30px;
+  line-height: 1.15;
+  color: #1b1b1b;
+  margin: 0 0 14px;
+}
+
+.body {
+  font-family: var(--font-geist-sans), Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #6d6d6d;
+  margin: 0 0 26px;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-family: var(--font-special-elite), cursive;
+  font-size: 13px;
+  letter-spacing: 1.5px;
+  color: #b4470f;
+  border-bottom: 1.5px solid #e2622b;
+}
+
+.back:hover {
+  color: #e2622b;
+}
