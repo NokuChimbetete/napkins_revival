@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { SecretDoor } from "./SecretDoor";
 import styles from "./landing.module.css";
 
@@ -6,9 +7,9 @@ export function LandingHeader() {
   return (
     <header className={styles.header}>
       <nav className={styles.nav}>
-        <a href="#about" className={styles.navLink}>
+        <Link href="/About-Us" className={styles.navLink}>
           ABOUT US
-        </a>
+        </Link>
         <a href="#magazine" className={styles.navLink}>
           MAGAZINE
         </a>
