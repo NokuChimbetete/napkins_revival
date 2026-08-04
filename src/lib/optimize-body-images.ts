@@ -54,9 +54,11 @@ export function optimizeBodyImages(html: string | null): string | null {
     const src = attr(tag, "src");
     if (!src || !optimizable(src)) return tag;
 
-    // keep everything the scraper set — width/height especially, since they
-    // reserve the box and stop the text jumping while the image arrives
-    const keep = ["alt", "width", "height", "class", "loading", "decoding"]
+    // Keep everything already set — width/height especially, since they
+    // reserve the box and stop the text jumping while the image arrives, and
+    // `style`, which is the editor's chosen display width. The sanitizer runs
+    // before this and has already reduced style to a bare `width:N%`.
+    const keep = ["alt", "width", "height", "style", "class", "loading", "decoding"]
       .map((name) => {
         const v = attr(tag, name);
         return v === null ? null : `${name}="${v.replace(/"/g, "&quot;")}"`;

@@ -219,6 +219,10 @@
   white-space: normal;
 }
 
+.bodyHtml :global(.align-left) {
+  text-align: left;
+}
+
 .bodyHtml :global(.align-right) {
   text-align: right;
 }
@@ -365,10 +369,43 @@
   font-weight: 500;
 }
 
+/* A body image carries `margin: … auto …`, so it sits in the middle of the
+   column whatever its width. That is right for a full-bleed illustration and
+   wrong for one an author has scaled down to 30% and wants against the margin
+   — which is the whole reason .align-left exists as something distinct from
+   "no wrapper at all". */
+/* Unchanged from before align-left existed: an image inside an aligned block
+   centres itself. Every such image in the archive is wider than the column and
+   therefore fills it, so this has never actually been visible — but two
+   published pieces depend on it not changing. */
 .bodyHtml :global(.align-center) img,
 .bodyHtml :global(.align-right) img {
   margin-left: auto;
   margin-right: auto;
+}
+
+/* A *scaled* image is where alignment finally means something: it no longer
+   fills the column, so it has a side to take.
+
+   `img[style]` is doing two jobs. It matches only images an editor has sized
+   down — a style attribute is emitted for nothing else, and the archive
+   contains none, so nothing already published can move. And its extra
+   specificity is what lets an image set to Left beat the .align-center of the
+   "image + caption" figure it sits inside, which the descendant rules above
+   would otherwise re-centre.
+
+   There is deliberately no .align-center rule here: centring is what the rules
+   above already do, and adding one at equal specificity would race the Left
+   rule on source order — which is exactly the bug this replaced. */
+.bodyHtml :global(.align-left) img,
+.bodyHtml :global(.align-left) img[style] {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+.bodyHtml :global(.align-right) img[style] {
+  margin-left: auto;
+  margin-right: 0;
 }
 
 .bodyHtml h1,

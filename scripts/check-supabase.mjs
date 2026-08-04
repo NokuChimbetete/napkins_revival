@@ -113,4 +113,24 @@ if (KEY && !KEY.startsWith("PASTE")) {
   }
 }
 
+// How an editor actually gets in. Worth reporting because Google being switched
+// off is invisible until someone presses the button — signInWithOAuth() only
+// builds a URL, it never asks Supabase whether the provider exists.
+try {
+  const res = await fetch(`${URL_}/auth/v1/settings`, { headers: { apikey: ANON } });
+  if (res.ok) {
+    const settings = await res.json();
+    const google = settings.external?.google === true;
+    console.log("\nsign-in");
+    console.log(`  ${google ? "✓" : "✗"} Google${google ? "" : "   ← Authentication → Providers → Google, in the Supabase dashboard"}`);
+    console.log(`  ${settings.external?.email === true ? "✓" : "✗"} email link (the fallback)`);
+    if (!google) {
+      console.log("\n  The Google client's redirect URI must be exactly:");
+      console.log(`    ${URL_}/auth/v1/callback`);
+    }
+  }
+} catch {
+  console.log("\nsign-in\n  ? could not reach the auth settings endpoint");
+}
+
 console.log();
