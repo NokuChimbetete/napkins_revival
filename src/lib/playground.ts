@@ -184,7 +184,11 @@ export async function getPlaygroundNapkins(): Promise<NapkinMeta[]> {
         .select(
           "slug, title, author_name, class_year, category, sort_order, napkin_variant, font_preset, issues!inner(issue_number, title)"
         )
-        .eq("is_frontmatter", false);
+        .eq("is_frontmatter", false)
+        // A piece reaches the table only when both it and its issue are live.
+        // The !inner join is what makes the second filter reach the issue row.
+        .eq("status", "published")
+        .eq("issues.status", "published");
       if (!error && data?.length) {
         type Row = (typeof data)[number] & { issues: { issue_number: number; title: string } | { issue_number: number; title: string }[] };
         const rows = (data as unknown as Row[]).map((r) => {
@@ -237,6 +241,8 @@ export async function getPieceForPlayground(slug: string): Promise<PlaygroundPie
         .select(`${PIECE_COLUMNS}, issues!inner(issue_number, title)`)
         .eq("slug", slug)
         .eq("is_frontmatter", false)
+        .eq("status", "published")
+        .eq("issues.status", "published")
         .maybeSingle();
       if (!error && data) {
         const row = data as unknown as Record<string, unknown> & {

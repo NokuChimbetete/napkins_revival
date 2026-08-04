@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { SecretDoor } from "./SecretDoor";
 import styles from "./landing.module.css";
 
 export function LandingHeader() {
@@ -16,13 +17,7 @@ export function LandingHeader() {
         </a>
       </nav>
       <div className={styles.estBadge}>est. 2022</div>
-      <Image
-        src="/assets/smile-button.svg"
-        alt="Hand-drawn smiley doodle"
-        width={150}
-        height={150}
-        className={styles.smiley}
-      />
+      <SecretDoor />
       <div className={styles.titleWrap}>
         <Image
           src="/assets/napkins-title.png"

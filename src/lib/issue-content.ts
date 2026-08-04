@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { supabaseConfigured } from "@/lib/supabase/configured";
 import { optimizeBodyImages } from "@/lib/optimize-body-images";
+import { sanitizeHtml } from "@/lib/sanitize-html";
 import issue1 from "@/lib/fixtures/issue-1.json";
 import issue2 from "@/lib/fixtures/issue-2.json";
 import issue3 from "@/lib/fixtures/issue-3.json";
@@ -89,9 +90,18 @@ export function rowToEntry(p: Record<string, unknown>, fallbackOrder = 0): Entry
     class_year: (p.class_year as string) ?? "",
     category: (p.category as string) ?? null,
     body: (p.body as string) ?? null,
-    // artwork is routed through the image optimizer here so it happens once,
-    // server-side, and travels with the JSON the napkin modal fetches
-    body_html: optimizeBodyImages((p.body_html as string) ?? null),
+    // Two passes, in this order and only here.
+    //
+    // sanitizeHtml first: body_html is a regenerable cache, but it is still a
+    // text column that gets injected with dangerouslySetInnerHTML, so it is
+    // re-checked against an allowlist on the way out rather than trusted
+    // because of who wrote it. This is the single choke point every read path
+    // shares — reader, napkin modal, admin preview.
+    //
+    // Then the image optimizer, so artwork gets AVIF negotiation and
+    // per-viewport sizing. Done in the data layer so it happens once,
+    // server-side, and travels with the JSON the napkin modal fetches.
+    body_html: optimizeBodyImages(sanitizeHtml((p.body_html as string) ?? null)),
     galleries: (p.galleries as string[][]) ?? [],
     images: (p.images as string[]) ?? [],
     verse: (p.verse as boolean) ?? false,
@@ -111,12 +121,14 @@ export async function getIssueContent(issueNumber: number): Promise<IssueContent
         .from("issues")
         .select("id, credits, page_images, pdf_url")
         .eq("issue_number", issueNumber)
+        .eq("status", "published")
         .single();
       if (issue) {
         const { data: pieces } = await supabase
           .from("pieces")
           .select(PIECE_COLUMNS)
           .eq("issue_id", issue.id)
+          .eq("status", "published")
           .order("sort_order", { ascending: true });
         if (pieces?.length || (issue.page_images as string[])?.length) {
           return {

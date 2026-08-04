@@ -21,6 +21,10 @@ export async function getIssues(): Promise<Issue[]> {
     const { data, error } = await supabase
       .from("issues")
       .select("*")
+      // Drafts are already hidden from anon by RLS; the filter is here too so
+      // that an editor browsing the public site while signed in sees the site
+      // as readers see it, not their own half-finished issue on the shelf.
+      .eq("status", "published")
       .order("issue_number", { ascending: true });
     if (error || !data?.length) return FALLBACK_ISSUES;
     return data;

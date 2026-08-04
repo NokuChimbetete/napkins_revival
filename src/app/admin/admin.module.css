@@ -1,10 +1,14 @@
+/* The admin shell: the desktop gate, the top bar, and the page frame.
+   Shared widgets (buttons, fields, cards) live in
+   src/components/admin/ui.module.css. */
+
 .page {
   flex: 1;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
   background: #ffffff;
-  padding: 40px 24px;
+  color: #1b1b1b;
+  font-family: var(--font-geist-sans), Helvetica, Arial, sans-serif;
 }
 
 /* ---- the gate -------------------------------------------------------------
@@ -18,7 +22,10 @@
    told they can't use, and no user-agent guessing. */
 
 .desk {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 
 .gate {
@@ -31,23 +38,17 @@
   }
 
   .gate {
-    display: block;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 30rem;
+    margin: 0 auto;
+    padding: 40px 24px;
   }
 }
 
-/* ---- placeholder until Phase 4 ---- */
-
-.stub {
-  color: #828282;
-  font-family: var(--font-geist-sans), Helvetica, Arial, sans-serif;
-  font-size: 15px;
-}
-
 /* ---- the note a phone gets ---- */
-
-.gate {
-  max-width: 30rem;
-}
 
 .mark {
   display: block;
@@ -69,7 +70,6 @@
 }
 
 .body {
-  font-family: var(--font-geist-sans), Helvetica, Arial, sans-serif;
   font-size: 16px;
   line-height: 1.6;
   color: #6d6d6d;
@@ -85,8 +85,201 @@
   letter-spacing: 1.5px;
   color: #b4470f;
   border-bottom: 1.5px solid #e2622b;
+  align-self: flex-start;
 }
 
 .back:hover {
   color: #e2622b;
+}
+
+/* ---- top bar ---- */
+
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 0 26px;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.93);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid #ece8df;
+}
+
+.barMark {
+  font-family: var(--font-archivo-black), sans-serif;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #e2622b;
+}
+
+.crumbs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #8a8a82;
+  min-width: 0;
+}
+
+.crumbLink {
+  color: #8a8a82;
+  white-space: nowrap;
+}
+
+.crumbLink:hover {
+  color: #1b1b1b;
+}
+
+.crumbHere {
+  color: #1b1b1b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.barSpacer {
+  flex: 1;
+}
+
+.who {
+  font-size: 12.5px;
+  color: #8a8a82;
+}
+
+.signOut {
+  font-size: 12.5px;
+  color: #8a8a82;
+  background: none;
+  border: 0;
+  padding: 6px 2px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.signOut:hover {
+  color: #b4470f;
+}
+
+.viewSite {
+  font-size: 12.5px;
+  color: #0071ad;
+}
+
+.viewSite:hover {
+  color: #005a8a;
+}
+
+/* ---- page frame ---- */
+
+.frame {
+  flex: 1;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 34px 26px 80px;
+  min-height: 0;
+}
+
+/* the builder wants the whole window, not a centred column */
+.frameWide {
+  max-width: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---- sign in ---- */
+
+.signInPage {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px 90px;
+}
+
+.signInCard {
+  width: 100%;
+  max-width: 27rem;
+}
+
+.signInTitle {
+  font-family: var(--font-dm-serif), Georgia, serif;
+  font-weight: 400;
+  font-size: 34px;
+  line-height: 1.1;
+  margin: 0 0 10px;
+}
+
+.signInBody {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: #6d6d6d;
+  margin: 0 0 26px;
+}
+
+.signInForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ---- Google ----
+   White with a hairline border rather than the admin's orange: this is
+   somebody else's button and it should look like the one people already know,
+   or they hesitate over it. */
+
+.googleButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 11px;
+  width: 100%;
+  height: 46px;
+  border: 1px solid #ddd8cd;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #1b1b1b;
+  font-family: inherit;
+  font-size: 15px;
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease, box-shadow 140ms ease;
+}
+
+.googleButton:hover:not(:disabled) {
+  border-color: #b9b2a4;
+  background: #fbfaf7;
+  box-shadow: 0 1px 4px rgba(40, 30, 15, 0.08);
+}
+
+.googleButton:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.googleButton:focus-visible {
+  outline: 2px solid #e2622b;
+  outline-offset: 2px;
+}
+
+
+.signInError {
+  border: 1px solid #f0cfc6;
+  background: #fdf5f2;
+  border-radius: 8px;
+  padding: 14px 16px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: #a1381a;
+}
+
+.signInFoot {
+  margin: 22px 0 0;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: #a09a8f;
 }
