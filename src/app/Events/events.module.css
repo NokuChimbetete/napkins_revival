@@ -1,0 +1,1163 @@
+/* /Events — the four exhibitions as one scroll.
+ *
+ * A rebuild of four Cargo pages: /Fractal-Landing-Page, /Honk-Please-1,
+ * /Borde__ and /Chimera-1. Every measurement below was taken off the live
+ * pages at a 1280px viewport (a 1264.67px container after the scrollbar),
+ * which is Cargo's desktop step.
+ *
+ * ---------------------------------------------------------------------------
+ * THE UNIT
+ * ---------------------------------------------------------------------------
+ * Cargo sets `html { font-size: 81% }` from JavaScript — 81% of the browser's
+ * 16px default, so 12.96px — and then writes every size in rem. Reproducing
+ * that by setting html's font-size here would leak into every other route, so
+ * the same number lives on --r and each size is a multiple of it. The rem
+ * figures in the comments are Cargo's own, so they can be checked against the
+ * old site directly.
+ *
+ * That is the whole reason this page matches: the sizes are not transcribed
+ * pixel values, they are the original's arithmetic.
+ *
+ * ---------------------------------------------------------------------------
+ * THE GRID
+ * ---------------------------------------------------------------------------
+ * Cargo's twelve columns do NOT use a gap. Each column carries inner padding
+ * (its `grid-pad`) and the row pulls itself out by that same amount with a
+ * negative margin, so a column's *content* lines up flush with the page
+ * padding while adjacent columns' contents sit two paddings apart.
+ *
+ * Measured on the live Honk page, container 1264.67px, page padding 33.70px:
+ *
+ *   grid-pad="2"   column padding 12.96px   twelve columns of 101.93px
+ *   grid-pad="3"   column padding 19.44px   twelve columns of 103.01px
+ *   both           first column's text edge lands on 33.70px — the page padding
+ *
+ * A `gap` instead of this would narrow every column and shift every edge, so
+ * it is worth leaving alone.
+ *
+ * ---------------------------------------------------------------------------
+ * MOTION
+ * ---------------------------------------------------------------------------
+ * Everything that moves on this page is an opacity transition. No transforms,
+ * no parallax, no pinning, nothing that touches the scroll position — the
+ * scrollbar belongs to the browser. See the reduced-motion block at the foot.
+ */
+
+.page {
+  /* Cargo's html{font-size:81%} of a 16px default. Everything scales from it. */
+  --r: 12.96px;
+
+  /* one <br> in Cargo's markup — the body line-height, and its only vertical
+     spacing device. Gaps in the original are counted in these. */
+  --gap: calc(var(--r) * 2.6); /* 33.70px */
+  --pagePad: calc(var(--r) * 2.6); /* 2.6rem — all four exhibitions */
+  --colPad: var(--r); /* grid-pad="2" */
+  --colPadWide: calc(var(--r) * 1.5); /* grid-pad="3" */
+
+  /* The pinned nav. --navLogo is the logo's WIDTH; the file is 182x240, so its
+     height is 1.319 times that — getting this wrong makes --navH too small and
+     the subpages' first line slides under the bar. Anything that starts at the
+     very top of a page has to clear --navH. */
+  --navLogo: calc(var(--r) * 4.4);
+  --navH: calc(var(--navLogo) * 1.319 + var(--r) * 2.2);
+
+  /* defaults; each section overrides them — see the .act* rules */
+  --ink: rgba(0, 0, 0, 0.85);
+  --accent: #006195;
+  --link: #ff5900;
+  --linkHover: #0071ad;
+  --grey: #828282;
+
+  position: relative;
+  min-height: 100vh;
+  background: #ffffff;
+  color: var(--ink);
+  font-family: var(--font-inter), Helvetica, Arial, sans-serif;
+  font-size: calc(var(--r) * 2); /* 2rem  = 25.92px */
+  line-height: 1.3; /* 33.70px */
+  /* a fixed full-viewport layer cannot make the page scroll sideways, but a
+     stray wide child could; this is the backstop the house rule asks for */
+  overflow-x: clip;
+}
+
+/* ---- the art stage --------------------------------------------------------
+   One fixed layer per exhibition, stacked, with exactly one at opacity 1.
+   Which one is decided by ActStage, which writes data-act on this element.
+
+   --layerState exists to be read by a test: it is not transitioned and not
+   inherited from anything, so getComputedStyle reports the target state the
+   instant the attribute changes, rather than whatever opacity happens to be
+   mid-fade. */
+
+.stage {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: #ffffff;
+}
+
+.layer {
+  --layerState: 0;
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 700ms ease;
+}
+
+.stage[data-act="fractal"] .layer[data-layer="fractal"],
+.stage[data-act="honk"] .layer[data-layer="honk"],
+.stage[data-act="borde"] .layer[data-layer="borde"],
+.stage[data-act="chimera"] .layer[data-layer="chimera"] {
+  --layerState: 1;
+  opacity: 1;
+}
+
+.layer img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Fractal's wallpaper is a photograph darkened by Cargo's backdrop overlay,
+   `rgba(0, 0, 0, 0.66)`. The other three carry no overlay. */
+.layerOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.66);
+}
+
+/* ---- sections -------------------------------------------------------------
+   Each exhibition is one <section>, transparent, sitting above the stage.
+   The only thing that changes between them is the ink and the accent. */
+
+.act {
+  position: relative;
+  z-index: 1;
+  padding: 0 var(--pagePad);
+}
+
+.actFractal {
+  --ink: #ffffff;
+  --accent: #0e9fed;
+  --grey: rgba(255, 255, 255, 0.7);
+  color: var(--ink);
+}
+
+.actHonk,
+.actBorde,
+.actChimera {
+  --ink: rgba(0, 0, 0, 0.85);
+  --accent: #006195;
+  color: var(--ink);
+}
+
+/* The one hard seam: Fractal is a dark photograph, everything after it is a
+   white page.
+
+   This used to paint a transparent-to-white gradient here, the idea being that
+   Fractal would resolve to white before the wallpaper swapped. It did not read
+   that way. Because the gradient scrolls with the content rather than sitting
+   still, what you actually saw was a white panel with visible top and bottom
+   edges sliding up the screen — a pane crossing the page, not a dissolve.
+
+   So it paints nothing now. All that is left is empty space, and its one job is
+   timing: Fractal's text is white, so it has to be gone from the screen before
+   the wallpaper underneath turns white, or it would vanish into it. The act
+   changes when the next section's top crosses the middle of the viewport, so
+   half a screen is the minimum and this is a little more than that — long
+   enough to leave a beat of empty dark before the picture changes.
+
+   The dissolve itself is now entirely the stage's 700ms cross-fade, with
+   nothing on top of it. */
+.actGap {
+  height: 55svh;
+  margin-top: calc(var(--gap) * 2);
+  pointer-events: none;
+}
+
+.actTail {
+  height: 40svh;
+  pointer-events: none;
+}
+
+/* ---- the twelve-column grid ----------------------------------------------- */
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  margin: 0 calc(var(--colPad) * -1);
+  align-items: start;
+}
+
+.rowWide {
+  margin: 0 calc(var(--colPadWide) * -1);
+}
+
+.col {
+  /* --from is the column this cell starts in, --span how many it covers, both
+     straight off the original's markup. Cargo used empty <div>s as spacers;
+     starting the cell explicitly does the same job without them. */
+  grid-column: var(--from, auto) / span var(--span, 12);
+  padding: 0 var(--colPad);
+  min-width: 0;
+}
+
+.rowWide .col {
+  padding: 0 var(--colPadWide);
+}
+
+/* ---- type -----------------------------------------------------------------
+   Cargo: h2 6rem/1.1 Averia Serif Libre, body 2rem/1.3, small 1.6rem/1.2 with
+   0.01em tracking, eyebrow 2rem italic. Diatype is a licensed face and is not
+   in this project; Inter stands in for it, as it already does on /About-Us. */
+
+.display {
+  font-family: var(--font-averia), Georgia, serif;
+  font-size: calc(var(--r) * 6); /* 77.76px */
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--ink);
+  margin: 0;
+}
+
+/* Fractal's title is the one that is not bold on the original. */
+.displayLight {
+  font-weight: 400;
+}
+
+.eyebrow {
+  font-size: calc(var(--r) * 2);
+  font-style: italic;
+  line-height: 1.3;
+  margin: 0;
+}
+
+.meta {
+  font-size: calc(var(--r) * 2);
+  line-height: 1.3;
+  margin: 0;
+}
+
+/* Cargo's <small> — the voice almost all the body copy on these pages is in. */
+.prose {
+  font-size: calc(var(--r) * 1.6); /* 20.74px */
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  color: var(--accent);
+}
+
+.prose p {
+  margin: 0 0 calc(var(--r) * 1.92); /* one <br><br> at this size */
+}
+
+.prose p:last-child {
+  margin-bottom: 0;
+}
+
+.lede {
+  font-size: calc(var(--r) * 6);
+  font-family: var(--font-averia), Georgia, serif;
+  font-weight: 400;
+  line-height: 1.1;
+  margin: 0 0 var(--gap);
+  color: var(--ink);
+}
+
+.strong {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.rule {
+  border: 0;
+  border-top: 1px solid currentColor;
+  opacity: 0.25;
+  margin: var(--gap) 0;
+}
+
+.credit {
+  font-size: calc(var(--r) * 1.6);
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  color: var(--grey);
+}
+
+.alignRight {
+  text-align: right;
+}
+
+.alignCentre {
+  text-align: center;
+}
+
+/* ---- links ---------------------------------------------------------------- */
+
+.act a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.prose a,
+.linkOut {
+  color: var(--link);
+  font-weight: 700;
+}
+
+.prose a:hover,
+.linkOut:hover {
+  color: var(--linkHover);
+}
+
+.actFractal .prose a,
+.actFractal .linkOut {
+  color: var(--accent);
+}
+
+.actFractal .prose a:hover,
+.actFractal .linkOut:hover {
+  color: #ffffff;
+}
+
+/* ---- the opening panel of each exhibition ---------------------------------
+   Identical geometry every time — eyebrow, title, place, date, at the same
+   measure and the same rhythm. The four worlds differ in everything else; this
+   frame is what keeps them one document rather than four pages in a row. */
+
+.opener {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: calc(var(--gap) * 2) 0;
+}
+
+.openerMeta {
+  margin-top: var(--gap);
+}
+
+/* The small label above a title. On the subpages it is a link back to the
+   exhibition; at the top of /Events it is the page's <h1>, which is why the
+   heading defaults are reset here rather than assumed. */
+.breadcrumb {
+  display: block;
+  font-size: calc(var(--r) * 1.6);
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  margin: 0;
+  padding-top: calc(var(--gap) * 1.5);
+}
+
+/* inside the opening panel it sits in the centred block, well above the title,
+   the way the original's breadcrumb row does */
+.opener .breadcrumb {
+  padding-top: 0;
+  margin-bottom: calc(var(--gap) * 4);
+}
+
+/* The down arrow under the opening title. Cargo drew this with a private-use
+   glyph (U+E08C) sitting inside an <h2> — so it was set at the display size,
+   6rem, which is why it reads as a big arrow on the original rather than an
+   icon. Height comes from the viewBox, which is taller than it is wide. */
+.scrollCue {
+  display: block;
+  width: calc(var(--r) * 2.8);
+  height: auto;
+  margin: calc(var(--gap) * 1.6) auto 0;
+  color: var(--ink);
+}
+
+/* ---- the rail -------------------------------------------------------------
+   Four anchors fixed down the left edge, the current one marked. Plain <a>
+   links to #ids, so keyboard and browser-native anchor navigation behave
+   exactly as they would without it.
+
+   It lives in the left gutter and must not sit on the text, which starts at
+   the page padding plus one column — 136px at a 1280 viewport. So the rail is
+   sized to fit that gutter rather than the content being moved aside for it:
+   1rem labels, a short dash, hard against the edge. The rail is a fixed 127px
+   wide, but the gutter it sits in grows with the viewport — the text column
+   starts on 129px at a 1200 viewport and 136px at 1280 — so the clearance is
+   worst at the narrow end, not the wide one. Measured: 9px at 1280, 2px at
+   1200. Hence the breakpoint below. */
+
+.rail {
+  position: fixed;
+  top: 50%;
+  left: calc(var(--r) * 0.2);
+  transform: translateY(-50%);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: calc(var(--r) * 1.2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.railLink {
+  --railState: 0;
+  display: flex;
+  align-items: center;
+  gap: calc(var(--r) * 0.4);
+  font-size: var(--r);
+  line-height: 1.2;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--railInk, rgba(0, 0, 0, 0.4));
+  text-decoration: none;
+  transition: color 400ms ease;
+}
+
+.railLink::before {
+  content: "";
+  width: calc(var(--r) * 0.6);
+  height: 1px;
+  background: currentColor;
+  transition: width 400ms ease;
+}
+
+.railLink[data-current="true"] {
+  --railState: 1;
+  color: var(--railInk, rgba(0, 0, 0, 0.85));
+  font-weight: 700;
+}
+
+.railLink[data-current="true"]::before {
+  width: calc(var(--r) * 1.2);
+}
+
+.railLink:hover {
+  color: var(--railInkHover, #0071ad);
+}
+
+/* over Fractal the rail is on a dark photograph */
+.rail[data-act="fractal"] {
+  --railInk: rgba(255, 255, 255, 0.55);
+  --railInkHover: #ffffff;
+}
+
+.rail[data-act="fractal"] .railLink[data-current="true"] {
+  --railInk: #ffffff;
+}
+
+/* ---- vertical rhythm ------------------------------------------------------
+   Cargo spaced everything with runs of <br>. These are those runs, named. */
+
+.gap1 {
+  margin-top: var(--gap);
+}
+
+.gap2 {
+  margin-top: calc(var(--gap) * 2);
+}
+
+.gap3 {
+  margin-top: calc(var(--gap) * 3);
+}
+
+.gap5 {
+  margin-top: calc(var(--gap) * 5);
+}
+
+/* ---- media ---------------------------------------------------------------- */
+
+.figure {
+  margin: 0;
+}
+
+.figure img,
+.figureScaled img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Cargo's data-scale: the width an image took up in its column, as a
+   percentage. Part of the layout, so it is reproduced rather than normalised. */
+.figureScaled {
+  margin: 0;
+  width: var(--scale, 100%);
+}
+
+.videoRow {
+  /* grid-col="x12" on the original: full width, outside the page padding */
+  margin: calc(var(--gap) * 2) calc(var(--pagePad) * -1) 0;
+}
+
+/* Half the area it used to cover, centred. Halving an area while keeping the
+   aspect ratio means scaling each side by 1/sqrt(2) = 0.70710678, so 100% of
+   the full-bleed row becomes 70.7107%. The original sat it in a centred box on
+   the backdrop rather than running it edge to edge, which is what this restores. */
+.video {
+  width: 70.7107%;
+  height: auto;
+  display: block;
+  margin-inline: auto;
+}
+
+.embed {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+}
+
+.embed iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* ---- site nav -------------------------------------------------------------
+   The same row as /About-Us and its siblings. It only ever sits over Fractal's
+   darkened photograph, so it is white throughout. */
+
+/* Pinned, so it is there for the whole scroll — which is what Cargo's own pin
+   did (`.page_container.overlay.fixed`, z-index 4) and what the landing page
+   does. Content passes underneath it rather than being pushed down: the
+   exhibition openers centre their content in a full screen, so nothing of
+   theirs ever reaches the top. The subpages, which do start at the top, get
+   --navH of clearance — see .breadcrumbRow. */
+
+.navBar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(var(--r) * 2);
+  padding: calc(var(--r) * 1.1) var(--pagePad);
+  /* the bar is mostly empty space; only the things in it should take clicks */
+  pointer-events: none;
+}
+
+.navBar a {
+  pointer-events: auto;
+}
+
+/* Over Fractal the bar sits on a darkened photograph. Everywhere else in the
+   section the page behind it is white — except the photographs, which are on
+   black and set --navInk themselves. */
+.navBar[data-act="fractal"],
+.photosPage .navBar {
+  --navInk: #ffffff;
+  --navHover: #e2622b;
+}
+
+.logo {
+  display: block;
+  width: var(--navLogo);
+  flex: none;
+}
+
+.logo img {
+  width: 100%;
+  height: auto;
+}
+
+.navLinks {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--r) * 3.5);
+}
+
+/* The landing page's nav type, not Cargo's — see the note in EventsNav.tsx.
+   Values lifted from .navLink in landing.module.css so the two agree. */
+/* scoped to .navBar so it beats `.act a { color: inherit }`, which the
+   subpages' nav sits inside and which would otherwise repaint it */
+.navBar .navLink {
+  font-family: var(--font-special-elite), cursive;
+  font-size: 15px;
+  letter-spacing: 2px;
+  line-height: 1.2;
+  white-space: nowrap;
+  color: var(--navInk, #1b1b1b);
+  border-bottom: 2px solid transparent;
+  padding-bottom: 2px;
+}
+
+.navBar .navLink:hover {
+  color: var(--navHover, #b4470f);
+  border-bottom-color: #e2622b;
+}
+
+/* ---- overture -------------------------------------------------------------
+   What used to be the Events index. One screen, then Fractal begins. */
+
+.overture {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-bottom: calc(var(--gap) * 2);
+}
+
+/* ---- explore spaces -------------------------------------------------------
+   The original ran an auto-playing slideshow of six photographs above a list
+   of the same six links. Autoplay in the middle of a long scroll competes with
+   reading and is exactly the motion `prefers-reduced-motion` exists to stop,
+   so the two are merged: each link carries its own photograph. Same six
+   destinations, same words, nothing moving on its own. */
+
+.spaceList {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--gap) calc(var(--r) * 2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.spaceLink {
+  display: block;
+  color: var(--ink);
+}
+
+.spaceThumb {
+  overflow: hidden;
+}
+
+.spaceThumb img {
+  transition: opacity 300ms ease;
+}
+
+.spaceLink:hover .spaceThumb img {
+  opacity: 0.72;
+}
+
+.spaceName {
+  display: block;
+  margin-top: calc(var(--r) * 1.2);
+  font-size: calc(var(--r) * 1.6);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+}
+
+.spaceBlurb {
+  font-weight: 400;
+}
+
+/* ---- honk zones ----------------------------------------------------------- */
+
+.zonePicture + .zonePicture {
+  margin-top: var(--gap);
+}
+
+/* ---- chimera's team -------------------------------------------------------
+   Chimera's own five curators. Not the Napkins roster — that is on /About-Us.
+
+   The original is two rows of grid-col="2" cells, three then two, starting at
+   column 2: so the group occupies columns 2 to 7, the left half of the page,
+   and keeps clear of the chimera drawing on the right. Three equal cells in a
+   span-6 track come to the same 204px, and because the list is flat the fourth
+   and fifth wrap onto a second row by themselves.
+
+   The cells carry the inner padding, so the track must not — see .teamCol. */
+
+/* two classes deep, so it beats `.rowWide .col`'s padding rather than losing
+   to it on specificity */
+.rowWide .teamCol {
+  padding: 0;
+}
+
+.teamGrid {
+  display: grid;
+  /* minmax(0, …) rather than a bare 1fr: a plain 1fr floors at the track's
+     min-content, so the longest caption widens its own column and the three
+     cells stop being equal */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  row-gap: var(--gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.teamCell {
+  text-align: center;
+  padding: 0 var(--colPadWide);
+}
+
+/* Not cropped to a square: the original prints each photograph at its own
+   proportions, at whatever data-scale it was given. */
+.teamPhoto img {
+  width: 100%;
+  height: auto;
+}
+
+.teamName {
+  margin: calc(var(--r) * 1.2) 0 0;
+  font-size: calc(var(--r) * 1.6);
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+}
+
+.teamRole {
+  margin: 0;
+  font-size: calc(var(--r) * 1.6);
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  color: var(--grey);
+}
+
+/* An envelope, as on the original — Cargo drew it with a private-use glyph
+   (U+E0F1) from its own icon font. Spelling the address out instead makes the
+   cell far wider than its column and pushes the row into the artwork. */
+.teamMail {
+  display: inline-flex;
+  margin-top: calc(var(--r) * 0.8);
+  color: var(--ink);
+}
+
+.teamMail svg {
+  width: calc(var(--r) * 1.8);
+  height: auto;
+}
+
+.teamMail:hover {
+  color: var(--link);
+}
+
+/* ---- colophon ------------------------------------------------------------- */
+
+.colophon {
+  padding-bottom: calc(var(--gap) * 2);
+}
+
+.colophon span {
+  display: block;
+  font-style: italic;
+}
+
+/* ---- the draggable pile ---------------------------------------------------
+   Cargo's `image-gallery="montessori"`. Driven by MontessoriGallery.tsx —
+   the note at the top of that file explains the coordinate system.
+
+   The pile is as tall as --pileHeight percent of its own width, which is what
+   `padding-top` on a percentage does: it resolves against the WIDTH. That is
+   the same unit Cargo used for the photographs' x and y, so the whole
+   arrangement scales as one piece. */
+
+.gallery {
+  margin-top: calc(var(--gap) * 2);
+}
+
+.galleryLabel {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--r) * 0.8);
+  font-size: calc(var(--r) * 1.6);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  color: #ff5900;
+  margin: 0 0 var(--gap);
+}
+
+.galleryArrow {
+  width: calc(var(--r) * 2);
+  height: auto;
+}
+
+.pile {
+  position: relative;
+  width: 100%;
+  padding-top: calc(var(--pileHeight) * 1%);
+}
+
+.pileItem {
+  position: absolute;
+  left: calc(var(--x) * 1%);
+  top: calc(var(--y) * 1%);
+  width: calc(var(--w) * 1%);
+  z-index: var(--z);
+  padding: 2px;
+  cursor: grab;
+  transform: translate(calc(var(--dx, 0) * 1px), calc(var(--dy, 0) * 1px));
+  touch-action: pan-y;
+}
+
+.pileItem[data-dragging="true"] {
+  cursor: grabbing;
+}
+
+.pileItem img {
+  width: 100%;
+  height: auto;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.verse {
+  font-size: calc(var(--r) * 1.6);
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  color: var(--accent);
+  margin: var(--gap) 0 0;
+}
+
+.verse span {
+  display: block;
+}
+
+/* ---- subpages -------------------------------------------------------------
+   The six spaces, the photographs and the audio guide. These had no wallpaper
+   on Cargo — page_container_bgcolor was left empty, so they used the site
+   default — and a 3rem page margin rather than the exhibitions' 2.6rem. */
+
+.spacePage,
+.photosPage {
+  --pagePad: calc(var(--r) * 3);
+  padding-bottom: calc(var(--gap) * 3);
+}
+
+/* The one page in the section with the lights off: Cargo set this one, and
+   only this one, to #000. */
+.photosPage {
+  --ink: rgba(255, 255, 255, 0.9);
+  --grey: rgba(255, 255, 255, 0.55);
+  background: #000000;
+  color: var(--ink);
+}
+
+/* On the subpages the breadcrumb is the first thing on the page, so unlike the
+   exhibition openers it would sit underneath the pinned nav. */
+.breadcrumbRow {
+  padding-top: calc(var(--navH) + var(--gap));
+}
+
+/* The space pages' title is Cargo's h1, which is a different animal from the
+   h2 the exhibitions use: 189px of the sans at 700 with -0.0343em tracking,
+   centred, not 77.76px of Averia. Measured on /Lungs at a 1280 viewport —
+   189 / 12.96 = 14.5833. */
+.spaceTitle {
+  font-family: var(--font-inter), Helvetica, Arial, sans-serif;
+  font-size: calc(var(--r) * 14.5833);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.0343em;
+  color: var(--ink);
+  margin: 0;
+}
+
+.spaceLede {
+  font-size: calc(var(--r) * 2);
+  line-height: 1.3;
+}
+
+.spaceLede p,
+.spaceProse p {
+  margin: 0 0 var(--gap);
+}
+
+.spaceLede p:last-child,
+.spaceProse p:last-child {
+  margin-bottom: 0;
+}
+
+.spaceProse {
+  font-size: calc(var(--r) * 2);
+  line-height: 1.3;
+}
+
+.stackedPicture + .stackedPicture {
+  margin-top: var(--gap);
+}
+
+/* Cargo's italic blue materials line, and the designer credit under it. */
+.materials {
+  font-size: calc(var(--r) * 1.6);
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  font-style: italic;
+  color: #0071ad;
+  margin: 0;
+}
+
+.designer {
+  font-size: calc(var(--r) * 1.6);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  margin: var(--gap) 0 0;
+}
+
+.spaceNav {
+  padding-top: var(--gap);
+}
+
+/* ---- the photographs ------------------------------------------------------
+   Cargo's "Freeform" gallery: alternating two-thirds and one-third widths that
+   pair off across the page. The percentages come from PhotoGallery.tsx. */
+
+.photoFlow {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.photoCell {
+  width: calc(var(--w) * 1%);
+  padding: calc(var(--r) * 0.4);
+}
+
+.photoButton {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+  color: inherit;
+}
+
+.photoButton img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.photoButton:focus-visible {
+  outline: 2px solid #ff5900;
+  outline-offset: 2px;
+}
+
+.lightbox {
+  width: min(94vw, 1200px);
+  max-width: none;
+  max-height: 94vh;
+  padding: calc(var(--r) * 1.6);
+  border: 0;
+  background: #000000;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.lightbox::backdrop {
+  background: rgba(0, 0, 0, 0.86);
+}
+
+.lightboxImg {
+  width: 100%;
+  height: auto;
+  max-height: 76vh;
+  object-fit: contain;
+  display: block;
+}
+
+.lightboxCaption {
+  font-size: calc(var(--r) * 1.4);
+  line-height: 1.3;
+  color: rgba(255, 255, 255, 0.6);
+  margin: calc(var(--r) * 1.2) 0 0;
+}
+
+.lightboxControls {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--r) * 1.6);
+  margin-top: calc(var(--r) * 1.2);
+  font-size: calc(var(--r) * 1.4);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.lightboxControls button {
+  border: 0;
+  background: none;
+  color: inherit;
+  font-size: calc(var(--r) * 1.8);
+  line-height: 1;
+  cursor: pointer;
+  padding: calc(var(--r) * 0.4) calc(var(--r) * 0.8);
+}
+
+.lightboxControls button:hover {
+  color: #ffffff;
+}
+
+.lightboxControls button:last-child {
+  margin-left: auto;
+}
+
+/* ---- the audio guide ------------------------------------------------------ */
+
+.trackTitle {
+  font-size: calc(var(--r) * 2);
+  font-weight: 700;
+  font-family: var(--font-inter), Helvetica, Arial, sans-serif;
+  line-height: 1.3;
+  margin: 0 0 calc(var(--r) * 1.2);
+}
+
+.audio {
+  width: 100%;
+  max-width: calc(var(--r) * 40);
+  display: block;
+}
+
+.transcript {
+  margin-top: calc(var(--r) * 1.2);
+  font-size: calc(var(--r) * 1.6);
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+}
+
+.transcript summary {
+  cursor: pointer;
+  color: var(--link);
+  font-weight: 700;
+}
+
+.transcript summary:hover {
+  color: var(--linkHover);
+}
+
+.transcriptBody {
+  margin-top: var(--gap);
+  color: var(--accent);
+  max-width: calc(var(--r) * 46);
+}
+
+.transcriptBody p {
+  margin: 0 0 calc(var(--r) * 1.2);
+}
+
+/* ---- responsive -----------------------------------------------------------
+   Cargo has no CSS breakpoints at all — it resizes from JavaScript, so there
+   is nothing to copy below the desktop step. 12.96px and 10.368px are Cargo's
+   own two values; the phone step is ours. Columns stack rather than shrink
+   past the point where a six-column measure stops being readable. */
+
+/* Below 1280 the gutter is narrower than the rail, and the only ways to keep
+   both would be to shrink the labels past legibility or to push the text
+   column across — and the text column is not allowed to move. Hiding it is the
+   honest third option: the acts still have their own headings and #ids, so
+   nothing becomes unreachable without it. */
+@media (max-width: 1279px) {
+  .rail {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .page {
+    --r: 10.368px;
+  }
+
+  /* the left-hand text column widens as the artwork behind it is scaled down */
+  .col[data-narrow="true"] {
+    --span: 10;
+  }
+
+  .spaceList,
+  .teamGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .navLinks {
+    gap: calc(var(--r) * 2.4);
+  }
+}
+
+@media (max-width: 700px) {
+  .page {
+    --r: 9px;
+  }
+
+  /* Every cell goes full width. Honk's artwork occupies the right half of a
+     16:9 image, so a cover-fit crop on a tall screen would show half a
+     rickshaw and none of the white the text needs to sit on. Below this width
+     each layer is contained and pinned to the bottom-right instead, which
+     turns the artwork into a corner motif and cannot overflow. */
+  .col {
+    --from: 1 !important;
+    --span: 12 !important;
+  }
+
+  .layer img {
+    object-fit: contain;
+    object-position: right bottom;
+  }
+
+  /* The pile becomes a plain two-column grid. Dragging a photograph inside a
+     scrolling page on a touch screen fights the scroll, so the offsets are
+     dropped here rather than the drag being disabled in JavaScript — which
+     means crossing this width in either direction always lands somewhere
+     correct, with no state to reset. */
+  .pile {
+    padding-top: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: calc(var(--r) * 1);
+  }
+
+  .pileItem {
+    position: static;
+    width: auto;
+    padding: 0;
+    transform: none;
+    cursor: auto;
+  }
+
+  .display {
+    font-size: calc(var(--r) * 4.4);
+  }
+
+  .lede {
+    font-size: calc(var(--r) * 4);
+  }
+
+  .spaceList {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .teamGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .navLinks {
+    gap: calc(var(--r) * 2);
+  }
+
+  .navBar .navLink {
+    font-size: 13px;
+    letter-spacing: 1.4px;
+  }
+
+  .videoRow {
+    margin-left: calc(var(--pagePad) * -1);
+    margin-right: calc(var(--pagePad) * -1);
+  }
+
+  /* the photographs go to one per row rather than pairing off */
+  .photoCell {
+    width: 100%;
+  }
+}
+
+/* ---- reduced motion -------------------------------------------------------
+   The cross-fades are the only motion here, and they are opacity only, so
+   removing the duration leaves a correct page that simply cuts between
+   states. Nothing else on the page moves of its own accord. */
+
+@media (prefers-reduced-motion: reduce) {
+  .layer,
+  .railLink,
+  .railLink::before {
+    transition: none;
+  }
+}

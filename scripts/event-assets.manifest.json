@@ -1,0 +1,806 @@
+{
+  "images": {
+    "fractal/4o0a4597-1": {
+      "src": "/assets/events/fractal/4o0a4597-1.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 63,
+      "source": "4O0A4597-1.JPG"
+    },
+    "fractal/4o0a4721": {
+      "src": "/assets/events/fractal/4o0a4721.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 63,
+      "source": "4O0A4721.jpg"
+    },
+    "fractal/4o0a4663": {
+      "src": "/assets/events/fractal/4o0a4663.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 63,
+      "source": "4O0A4663.jpg"
+    },
+    "fractal/4o0a4814": {
+      "src": "/assets/events/fractal/4o0a4814.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 63,
+      "source": "4O0A4814.jpg"
+    },
+    "fractal/4o0a4860": {
+      "src": "/assets/events/fractal/4o0a4860.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 63,
+      "source": "4O0A4860.jpg"
+    },
+    "fractal/4o0a4887": {
+      "src": "/assets/events/fractal/4o0a4887.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 63,
+      "source": "4O0A4887.jpg"
+    },
+    "honk/screenshot-2025-01-27-at-23-17-37": {
+      "src": "/assets/events/honk/screenshot-2025-01-27-at-23-17-37.webp",
+      "width": 1400,
+      "height": 482,
+      "scale": 100,
+      "source": "Screenshot-2025-01-27-at-23.17.37.png"
+    },
+    "honk/screenshot-2025-01-27-at-23-19-53": {
+      "src": "/assets/events/honk/screenshot-2025-01-27-at-23-19-53.webp",
+      "width": 798,
+      "height": 536,
+      "scale": 99,
+      "source": "Screenshot-2025-01-27-at-23.19.53.png"
+    },
+    "honk/img-4819": {
+      "src": "/assets/events/honk/img-4819.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "IMG_4819.JPG"
+    },
+    "honk/img-4797": {
+      "src": "/assets/events/honk/img-4797.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "IMG_4797.JPG"
+    },
+    "honk/img-4875": {
+      "src": "/assets/events/honk/img-4875.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 69,
+      "source": "IMG_4875.JPG"
+    },
+    "honk/img-4986": {
+      "src": "/assets/events/honk/img-4986.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 70,
+      "source": "IMG_4986.JPG"
+    },
+    "honk/img-4949": {
+      "src": "/assets/events/honk/img-4949.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "IMG_4949.JPG"
+    },
+    "honk/img-4775": {
+      "src": "/assets/events/honk/img-4775.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 71,
+      "source": "IMG_4775.JPG"
+    },
+    "honk/img-4936": {
+      "src": "/assets/events/honk/img-4936.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 92,
+      "source": "IMG_4936.JPG"
+    },
+    "honk/img-4912": {
+      "src": "/assets/events/honk/img-4912.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 85,
+      "source": "IMG_4912.JPG"
+    },
+    "chimera/x-2": {
+      "src": "/assets/events/chimera/x-2.webp",
+      "width": 1021,
+      "height": 344,
+      "scale": 40,
+      "source": "x-2.png"
+    },
+    "chimera/continuum-square": {
+      "src": "/assets/events/chimera/continuum-square.webp",
+      "width": 700,
+      "height": 700,
+      "scale": 100,
+      "source": "Continuum-Square.jpg"
+    },
+    "chimera/screenshot-2024-06-16-at-16-30-28": {
+      "src": "/assets/events/chimera/screenshot-2024-06-16-at-16-30-28.webp",
+      "width": 648,
+      "height": 666,
+      "scale": 97,
+      "source": "Screenshot-2024-06-16-at-16.30.28.png"
+    },
+    "chimera/polina": {
+      "src": "/assets/events/chimera/polina.webp",
+      "width": 700,
+      "height": 700,
+      "scale": 100,
+      "source": "Polina.jpeg"
+    },
+    "chimera/dasha-square": {
+      "src": "/assets/events/chimera/dasha-square.webp",
+      "width": 676,
+      "height": 676,
+      "scale": 100,
+      "source": "Dasha-Square.jpg"
+    },
+    "chimera/jan": {
+      "src": "/assets/events/chimera/jan.webp",
+      "width": 700,
+      "height": 700,
+      "scale": 100,
+      "source": "Jan.jpeg"
+    },
+    "spaces/4o0a4797": {
+      "src": "/assets/events/spaces/4o0a4797.webp",
+      "width": 2000,
+      "height": 1333,
+      "scale": 100,
+      "source": "4O0A4797.jpg"
+    },
+    "spaces/img000-1": {
+      "src": "/assets/events/spaces/img000-1.webp",
+      "width": 1400,
+      "height": 1167,
+      "scale": 100,
+      "source": "IMG000-1.jpg"
+    },
+    "spaces/img000": {
+      "src": "/assets/events/spaces/img000.webp",
+      "width": 1400,
+      "height": 1167,
+      "scale": 100,
+      "source": "IMG000.jpg"
+    },
+    "spaces/4o0a4712": {
+      "src": "/assets/events/spaces/4o0a4712.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "4O0A4712.jpg"
+    },
+    "spaces/4o0a4845": {
+      "src": "/assets/events/spaces/4o0a4845.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "4O0A4845.jpg"
+    },
+    "spaces/4o0a4847": {
+      "src": "/assets/events/spaces/4o0a4847.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 100,
+      "source": "4O0A4847.jpg"
+    },
+    "spaces/4o0a4597": {
+      "src": "/assets/events/spaces/4o0a4597.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "4O0A4597.jpg"
+    },
+    "spaces/4o0a4803": {
+      "src": "/assets/events/spaces/4o0a4803.webp",
+      "width": 2000,
+      "height": 1333,
+      "scale": 100,
+      "source": "4O0A4803.jpg"
+    },
+    "spaces/4o0a4841": {
+      "src": "/assets/events/spaces/4o0a4841.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "4O0A4841.jpg"
+    },
+    "spaces/4o0a4921": {
+      "src": "/assets/events/spaces/4o0a4921.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "4O0A4921.jpg"
+    },
+    "spaces/4o0a5104": {
+      "src": "/assets/events/spaces/4o0a5104.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "4O0A5104.jpg"
+    },
+    "spaces/4o0a4601": {
+      "src": "/assets/events/spaces/4o0a4601.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "4O0A4601.jpg"
+    },
+    "spaces/4o0a4583": {
+      "src": "/assets/events/spaces/4o0a4583.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 100,
+      "source": "4O0A4583.jpg"
+    },
+    "spaces/4o0a4868": {
+      "src": "/assets/events/spaces/4o0a4868.webp",
+      "width": 2000,
+      "height": 1333,
+      "scale": 100,
+      "source": "4O0A4868.jpg"
+    },
+    "spaces/4o0a4669": {
+      "src": "/assets/events/spaces/4o0a4669.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "4O0A4669.jpg"
+    },
+    "spaces/4o0a4632": {
+      "src": "/assets/events/spaces/4o0a4632.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "4O0A4632.jpg"
+    },
+    "spaces/4o0a4804": {
+      "src": "/assets/events/spaces/4o0a4804.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "4O0A4804.jpg"
+    },
+    "spaces/4o0a4869": {
+      "src": "/assets/events/spaces/4o0a4869.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "4O0A4869.jpg"
+    },
+    "spaces/4o0a4980": {
+      "src": "/assets/events/spaces/4o0a4980.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 100,
+      "source": "4O0A4980.jpg"
+    },
+    "spaces/4o0a4642": {
+      "src": "/assets/events/spaces/4o0a4642.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "4O0A4642.jpg"
+    },
+    "spaces/4o0a4664": {
+      "src": "/assets/events/spaces/4o0a4664.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 100,
+      "source": "4O0A4664.jpg"
+    },
+    "spaces/4o0a4771": {
+      "src": "/assets/events/spaces/4o0a4771.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "4O0A4771.jpg"
+    },
+    "spaces/4o0a4638": {
+      "src": "/assets/events/spaces/4o0a4638.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 100,
+      "source": "4O0A4638.jpg"
+    },
+    "spaces/4o0a4813": {
+      "src": "/assets/events/spaces/4o0a4813.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "4O0A4813.jpg"
+    },
+    "spaces/4o0a5101": {
+      "src": "/assets/events/spaces/4o0a5101.webp",
+      "width": 2000,
+      "height": 1333,
+      "scale": 100,
+      "source": "4O0A5101.jpg"
+    },
+    "spaces/4o0a5004": {
+      "src": "/assets/events/spaces/4o0a5004.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "4O0A5004.jpg"
+    },
+    "spaces/4o0a4829": {
+      "src": "/assets/events/spaces/4o0a4829.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "4O0A4829.jpg"
+    },
+    "spaces/4o0a4743": {
+      "src": "/assets/events/spaces/4o0a4743.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "4O0A4743.jpg"
+    },
+    "spaces/4o0a4734": {
+      "src": "/assets/events/spaces/4o0a4734.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "4O0A4734.jpg"
+    },
+    "spaces/4o0a4775": {
+      "src": "/assets/events/spaces/4o0a4775.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 100,
+      "source": "4O0A4775.jpg"
+    },
+    "spaces/4o0a5082": {
+      "src": "/assets/events/spaces/4o0a5082.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "4O0A5082.jpg"
+    },
+    "spaces/4o0a4838": {
+      "src": "/assets/events/spaces/4o0a4838.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 100,
+      "source": "4O0A4838.jpg"
+    },
+    "spaces/4o0a4992": {
+      "src": "/assets/events/spaces/4o0a4992.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 100,
+      "source": "4O0A4992.jpg"
+    },
+    "spaces/4o0a4613": {
+      "src": "/assets/events/spaces/4o0a4613.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 100,
+      "source": "4O0A4613.jpg"
+    },
+    "spaces/4o0a4991": {
+      "src": "/assets/events/spaces/4o0a4991.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 100,
+      "source": "4O0A4991.jpg"
+    },
+    "spaces/4o0a4783": {
+      "src": "/assets/events/spaces/4o0a4783.webp",
+      "width": 2000,
+      "height": 1333,
+      "scale": 100,
+      "source": "4O0A4783.jpg"
+    },
+    "spaces/4o0a4677": {
+      "src": "/assets/events/spaces/4o0a4677.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "4O0A4677.jpg"
+    },
+    "spaces/4o0a4616": {
+      "src": "/assets/events/spaces/4o0a4616.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 100,
+      "source": "4O0A4616.jpg"
+    },
+    "spaces/4o0a4748": {
+      "src": "/assets/events/spaces/4o0a4748.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "4O0A4748.jpg"
+    },
+    "spaces/4o0a4857": {
+      "src": "/assets/events/spaces/4o0a4857.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 100,
+      "source": "4O0A4857.jpg"
+    },
+    "spaces/4o0a5098": {
+      "src": "/assets/events/spaces/4o0a5098.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 100,
+      "source": "4O0A5098.jpg"
+    },
+    "spaces/4o0a4788": {
+      "src": "/assets/events/spaces/4o0a4788.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 100,
+      "source": "4O0A4788.jpg"
+    },
+    "spaces/4o0a4815": {
+      "src": "/assets/events/spaces/4o0a4815.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "4O0A4815.jpg"
+    },
+    "spaces/4o0a4999": {
+      "src": "/assets/events/spaces/4o0a4999.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 100,
+      "source": "4O0A4999.jpg"
+    },
+    "spaces/4o0a4855": {
+      "src": "/assets/events/spaces/4o0a4855.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 100,
+      "source": "4O0A4855.jpg"
+    },
+    "spaces/4o0a4996": {
+      "src": "/assets/events/spaces/4o0a4996.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 100,
+      "source": "4O0A4996.jpg"
+    },
+    "spaces/4o0a4786": {
+      "src": "/assets/events/spaces/4o0a4786.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "4O0A4786.jpg"
+    },
+    "spaces/4o0a5002": {
+      "src": "/assets/events/spaces/4o0a5002.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "4O0A5002.jpg"
+    },
+    "spaces/4o0a4918": {
+      "src": "/assets/events/spaces/4o0a4918.webp",
+      "width": 2000,
+      "height": 1333,
+      "scale": 100,
+      "source": "4O0A4918.jpg"
+    },
+    "spaces/4o0a4872": {
+      "src": "/assets/events/spaces/4o0a4872.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "4O0A4872.jpg"
+    },
+    "spaces/4o0a4769": {
+      "src": "/assets/events/spaces/4o0a4769.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 100,
+      "source": "4O0A4769.jpg"
+    },
+    "spaces/4o0a4820": {
+      "src": "/assets/events/spaces/4o0a4820.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 100,
+      "source": "4O0A4820.jpg"
+    },
+    "spaces/4o0a4917": {
+      "src": "/assets/events/spaces/4o0a4917.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "4O0A4917.jpg"
+    },
+    "spaces/4o0a4902": {
+      "src": "/assets/events/spaces/4o0a4902.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "4O0A4902.jpg"
+    },
+    "spaces/4o0a4647": {
+      "src": "/assets/events/spaces/4o0a4647.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "4O0A4647.jpg"
+    },
+    "spaces/4o0a4968": {
+      "src": "/assets/events/spaces/4o0a4968.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "4O0A4968.jpg"
+    },
+    "spaces/4o0a4889": {
+      "src": "/assets/events/spaces/4o0a4889.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "4O0A4889.jpg"
+    },
+    "spaces/4o0a4893": {
+      "src": "/assets/events/spaces/4o0a4893.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 100,
+      "source": "4O0A4893.jpg"
+    },
+    "spaces/4o0a4919": {
+      "src": "/assets/events/spaces/4o0a4919.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "4O0A4919.jpg"
+    },
+    "spaces/4o0a4908": {
+      "src": "/assets/events/spaces/4o0a4908.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "4O0A4908.jpg"
+    },
+    "honk-photos/img-4919-01": {
+      "src": "/assets/events/honk-photos/img-4919-01.webp",
+      "width": 1400,
+      "height": 934,
+      "scale": 100,
+      "source": "IMG_4919_01.jpg"
+    },
+    "honk-photos/img-4754-02": {
+      "src": "/assets/events/honk-photos/img-4754-02.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 100,
+      "source": "IMG_4754_02.jpg"
+    },
+    "honk-photos/img-4986": {
+      "src": "/assets/events/honk-photos/img-4986.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 100,
+      "source": "IMG_4986.JPG"
+    },
+    "honk-photos/img-4968": {
+      "src": "/assets/events/honk-photos/img-4968.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "IMG_4968.JPG"
+    },
+    "honk-photos/img-4960": {
+      "src": "/assets/events/honk-photos/img-4960.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "IMG_4960.JPG"
+    },
+    "honk-photos/img-4949": {
+      "src": "/assets/events/honk-photos/img-4949.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "IMG_4949.JPG"
+    },
+    "honk-photos/img-4936": {
+      "src": "/assets/events/honk-photos/img-4936.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 100,
+      "source": "IMG_4936.JPG"
+    },
+    "honk-photos/img-4912": {
+      "src": "/assets/events/honk-photos/img-4912.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 100,
+      "source": "IMG_4912.JPG"
+    },
+    "honk-photos/img-4908": {
+      "src": "/assets/events/honk-photos/img-4908.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "IMG_4908.JPG"
+    },
+    "honk-photos/img-4899": {
+      "src": "/assets/events/honk-photos/img-4899.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 100,
+      "source": "IMG_4899.JPG"
+    },
+    "honk-photos/img-4892": {
+      "src": "/assets/events/honk-photos/img-4892.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "IMG_4892.JPG"
+    },
+    "honk-photos/img-4890": {
+      "src": "/assets/events/honk-photos/img-4890.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "IMG_4890.JPG"
+    },
+    "honk-photos/img-4875": {
+      "src": "/assets/events/honk-photos/img-4875.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 100,
+      "source": "IMG_4875.JPG"
+    },
+    "honk-photos/img-4855": {
+      "src": "/assets/events/honk-photos/img-4855.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 100,
+      "source": "IMG_4855.JPG"
+    },
+    "honk-photos/img-4853": {
+      "src": "/assets/events/honk-photos/img-4853.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "IMG_4853.JPG"
+    },
+    "honk-photos/img-4836": {
+      "src": "/assets/events/honk-photos/img-4836.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 100,
+      "source": "IMG_4836.JPG"
+    },
+    "honk-photos/img-4819": {
+      "src": "/assets/events/honk-photos/img-4819.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "IMG_4819.JPG"
+    },
+    "honk-photos/img-4808": {
+      "src": "/assets/events/honk-photos/img-4808.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 100,
+      "source": "IMG_4808.JPG"
+    },
+    "honk-photos/img-4797": {
+      "src": "/assets/events/honk-photos/img-4797.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "IMG_4797.JPG"
+    },
+    "honk-photos/img-4787": {
+      "src": "/assets/events/honk-photos/img-4787.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 100,
+      "source": "IMG_4787.JPG"
+    },
+    "honk-photos/img-4784": {
+      "src": "/assets/events/honk-photos/img-4784.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 100,
+      "source": "IMG_4784.JPG"
+    },
+    "honk-photos/img-4776": {
+      "src": "/assets/events/honk-photos/img-4776.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 100,
+      "source": "IMG_4776.JPG"
+    },
+    "honk-photos/img-4775": {
+      "src": "/assets/events/honk-photos/img-4775.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 100,
+      "source": "IMG_4775.JPG"
+    },
+    "honk-photos/img-4774": {
+      "src": "/assets/events/honk-photos/img-4774.webp",
+      "width": 1400,
+      "height": 2100,
+      "scale": 100,
+      "source": "IMG_4774.JPG"
+    },
+    "honk-photos/img-4770": {
+      "src": "/assets/events/honk-photos/img-4770.webp",
+      "width": 1400,
+      "height": 933,
+      "scale": 100,
+      "source": "IMG_4770.JPG"
+    }
+  },
+  "files": {
+    "fractal/lungs-video": {
+      "src": "/assets/events/fractal/lungs-video.mp4",
+      "bytes": 2496356,
+      "poster": "/assets/events/fractal/lungs-video-poster.webp"
+    },
+    "audio-guide/room-1": {
+      "src": "/assets/events/audio-guide/room-1.m4a",
+      "bytes": 1431156
+    },
+    "audio-guide/room-2": {
+      "src": "/assets/events/audio-guide/room-2.m4a",
+      "bytes": 1509831
+    },
+    "audio-guide/workshop-1-bodymapping": {
+      "src": "/assets/events/audio-guide/workshop-1-bodymapping.m4a",
+      "bytes": 1048706
+    },
+    "audio-guide/workshop-2-writing": {
+      "src": "/assets/events/audio-guide/workshop-2-writing.m4a",
+      "bytes": 1192470
+    }
+  },
+  "backdrops": {
+    "fractal": {
+      "src": "/assets/events/fractal/backdrop.webp",
+      "width": 2200,
+      "height": 1467,
+      "overlay": "rgba(0, 0, 0, 0.66)",
+      "source": "4O0A4594.jpg"
+    },
+    "honk": {
+      "src": "/assets/events/honk/backdrop.webp",
+      "width": 1920,
+      "height": 1080,
+      "overlay": "rgba(0, 0, 0, 0)",
+      "source": "Untitled-design-6.png"
+    },
+    "borde": {
+      "src": "/assets/events/borde/backdrop.webp",
+      "width": 1920,
+      "height": 1080,
+      "overlay": "rgba(0, 0, 0, 0)",
+      "source": "Untitled-design-7.png"
+    },
+    "chimera": {
+      "src": "/assets/events/chimera/backdrop.webp",
+      "width": 2200,
+      "height": 1556,
+      "overlay": "rgba(0, 0, 0, 0)",
+      "source": "Untitled_Artwork-3.png"
+    }
+  }
+}

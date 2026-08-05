@@ -88,7 +88,7 @@ export default function AboutUsPage() {
         <Link href="/#magazine" className={styles.navLink}>
           MAGAZINE
         </Link>
-        <Link href="/#events" className={styles.navLink}>
+        <Link href="/Events" className={styles.navLink}>
           EVENTS
         </Link>
         <a href="mailto:napkinsmag@gmail.com" className={styles.navLink}>
@@ -165,7 +165,7 @@ export default function AboutUsPage() {
         <div className={styles.learnLinks}>
           <Link href="/Submit-to-the-Magazine">submitting to the magazine</Link>
           <Link href="/Join-the-Team">joining the team</Link>
-          <Link href="/#events">participating in interactive exhibitions</Link>
+          <Link href="/Events">participating in interactive exhibitions</Link>
         </div>
       </div>
 

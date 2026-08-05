@@ -39,7 +39,7 @@ export default function SubmitPage() {
           <Link href="/#magazine" className={styles.navLink}>
             MAGAZINE
           </Link>
-          <Link href="/#events" className={styles.navLink}>
+          <Link href="/Events" className={styles.navLink}>
             EVENTS
           </Link>
           <a href="mailto:napkinsmag@gmail.com" className={styles.navLink}>

@@ -13,7 +13,7 @@ export function LandingHeader() {
         <a href="#magazine" className={styles.navLink}>
           MAGAZINE
         </a>
-        <a href="#events" className={styles.navLink}>
+        <a href="/Events" className={styles.navLink}>
           EVENTS
         </a>
       </nav>
