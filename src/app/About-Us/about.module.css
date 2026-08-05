@@ -3,18 +3,29 @@
  * The original is Cargo's attribute grid: [grid-row] with twelve [grid-col]
  * children, grid-pad="3" on each (so a 6px gutter between cells), and a
  * 1-column spacer at both ends of every row. That is reproduced here with a
- * plain CSS grid. Cargo's root font-size is 10px, so its rem figures land as:
- * body copy 2rem = 20px, small 1.6rem = 16px, h2 6rem = 60px, page pad 5rem.
+ * plain CSS grid.
+ *
+ * Cargo's rendered root font-size is 12.96px — it sets `html { font-size: 81% }`
+ * from JavaScript, against the browser's 16px default. (An earlier version of
+ * this file assumed the nominal 10px, and so rendered everything at 1/1.296 of
+ * the original.) Its rem figures therefore land as: body copy 2rem = 25.92px,
+ * small 1.6rem = 20.74px, h2 6rem = 77.76px, page padding 3rem = 38.88px.
+ *
+ * The columns do not use a gap. Each cell carries 19.44px of inner padding
+ * (Cargo's grid-pad="3") and the row insets itself by the same amount, so a
+ * cell's content lines up with the page padding and two adjacent cells'
+ * contents sit 38.88px apart. Measured on the live page at a 1280 viewport:
+ * twelve columns of 102px, the first cell's content on 38.88px.
  */
 
 .page {
   min-height: 100vh;
   background: #ffffff;
   font-family: var(--font-inter), Helvetica, Arial, sans-serif;
-  font-size: 20px;
+  font-size: 25.92px;
   line-height: 1.3;
   color: rgba(0, 0, 0, 0.85);
-  padding: 50px 0;
+  padding: 38.88px 0;
 }
 
 /* every section is one 12-column row; the 1-column gutters are spacers, so
@@ -22,8 +33,12 @@
 .row {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
-  column-gap: 6px;
-  padding: 0 50px;
+  padding: 0 19.44px;
+}
+
+/* the other half of Cargo's gutter: inner padding, not a gap */
+.row > * {
+  padding: 0 19.44px;
 }
 
 /* ---- nav ------------------------------------------------------------------
@@ -31,7 +46,7 @@
 
 .navRow {
   align-items: start;
-  margin-bottom: 46px;
+  margin-bottom: 59.6px;
 }
 
 .logo {
@@ -46,7 +61,7 @@
 
 .navLink {
   grid-column: span 1;
-  font-size: 16px;
+  font-size: 15.552px;
   line-height: 1.2;
   letter-spacing: 0.01em;
   color: rgba(0, 0, 0, 0.85);
@@ -68,7 +83,7 @@
 
 .eyebrow {
   grid-column: 2 / span 11;
-  font-size: 16px;
+  font-size: 20.736px;
   font-weight: 400;
   line-height: 1.2;
   letter-spacing: 0.01em;
@@ -79,7 +94,7 @@
 .display {
   grid-column: 2 / span 8;
   font-family: var(--font-averia), Georgia, serif;
-  font-size: 60px;
+  font-size: 77.76px;
   font-weight: 400;
   line-height: 1.1;
   color: #0071ad;
@@ -87,11 +102,11 @@
 }
 
 .displayRow {
-  margin-bottom: 60px;
+  margin-bottom: 77.8px;
 }
 
 .teamHeadingRow {
-  margin: 100px 0 50px;
+  margin: 129.6px 0 64.8px;
 }
 
 /* ---- narrative rows -------------------------------------------------------
@@ -100,7 +115,7 @@
 
 .narrativeRow {
   align-items: start;
-  margin-bottom: 90px;
+  margin-bottom: 116.6px;
 }
 
 .narrativeImage {
@@ -118,7 +133,7 @@
 }
 
 .narrativeText p {
-  margin: 0 0 26px;
+  margin: 0 0 33.7px;
 }
 
 .narrativeText p:last-child {
@@ -126,22 +141,29 @@
 }
 
 /* ---- team -----------------------------------------------------------------
-   A span-10 track holding five equal cells. The arithmetic works out exactly:
-   an outer column is c, so a 2-column cell plus its internal gutter is 2c + 6;
-   the span-10 track is 10c + 54 wide, and (10c + 54 - 4*6) / 5 = 2c + 6. So
-   these cells are the same width as the original's, and because the list is
-   flat the cells simply wrap — a short last row stays left-aligned. */
+   On the original these are five grid-col="2" cells: 204px wide at a 1280
+   viewport, each with 19.44px of inner padding, so the photograph inside comes
+   out 165px. Reproduced as a span-10 track of five equal cells carrying that
+   same inner padding and no gap, which works out to the same widths.
+
+   The list stays flat and the cells simply wrap, so a sixteenth person starts
+   a new left-aligned row and deleting someone closes the gap — there is still
+   no row count anywhere to keep in sync. */
 
 .teamGrid {
   grid-column: 2 / span 10;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 40px 6px;
+  row-gap: 51.84px;
+  /* the cells carry the inner padding, so the track itself must not — on the
+     original the five cells are direct children of the row */
+  padding: 0;
 }
 
 .teamCell {
   display: flex;
   flex-direction: column;
+  padding: 0 19.44px;
 }
 
 /* square crop, so a photo of any shape can be dropped into team-data.ts
@@ -151,7 +173,7 @@
   width: 100%;
   aspect-ratio: 1 / 1;
   overflow: hidden;
-  margin-bottom: 10px;
+  margin-bottom: 13px;
 }
 
 .teamPhoto img {
@@ -159,7 +181,7 @@
 }
 
 .teamName {
-  font-size: 16px;
+  font-size: 20.736px;
   line-height: 1.2;
   letter-spacing: 0.01em;
   text-align: center;
@@ -167,7 +189,7 @@
 }
 
 .teamRole {
-  font-size: 16px;
+  font-size: 20.736px;
   line-height: 1.2;
   letter-spacing: 0.01em;
   text-align: center;
@@ -178,7 +200,7 @@
    label(2) + links(6), with the label in the original's orange. */
 
 .learnRow {
-  margin-top: 110px;
+  margin-top: 142.6px;
   align-items: start;
 }
 
@@ -212,7 +234,7 @@
 .instaRow {
   display: flex;
   justify-content: flex-end;
-  padding: 90px 50px 0;
+  padding: 116.6px 38.88px 0;
 }
 
 .instaRow a {
@@ -248,22 +270,26 @@
 
 @media (max-width: 1100px) {
   .display {
-    font-size: 46px;
+    font-size: 59.6px;
   }
 
   .teamGrid {
-    gap: 32px 6px;
+    row-gap: 41.5px;
   }
 }
 
 @media (max-width: 900px) {
   .page {
-    font-size: 18px;
+    font-size: 23.3px;
     padding: 34px 0;
   }
 
   .row {
-    padding: 0 30px;
+    padding: 0 11.7px;
+  }
+
+  .row > * {
+    padding: 0 11.7px;
   }
 
   .logo {
@@ -272,7 +298,7 @@
 
   .navLink {
     grid-column: span 2;
-    font-size: 14px;
+    font-size: 15.552px;
   }
 
   .navLink:first-of-type {
@@ -281,7 +307,7 @@
 
   .display {
     grid-column: 2 / span 10;
-    font-size: 38px;
+    font-size: 49.2px;
   }
 
   /* stack the narrative rows: image over text, both full width */
@@ -291,16 +317,16 @@
   }
 
   .narrativeImage {
-    margin-bottom: 24px;
+    margin-bottom: 31.1px;
   }
 
   .narrativeRow {
-    margin-bottom: 64px;
+    margin-bottom: 83px;
   }
 
   .teamGrid {
     grid-template-columns: repeat(3, 1fr);
-    gap: 28px 12px;
+    row-gap: 36.3px;
   }
 
   .teamHeadingRow {
@@ -321,17 +347,21 @@
   }
 
   .instaRow {
-    padding: 60px 30px 0;
+    padding: 77.8px 23.3px 0;
   }
 }
 
 @media (max-width: 600px) {
   .page {
-    font-size: 17px;
+    font-size: 22px;
   }
 
   .row {
-    padding: 0 18px;
+    padding: 0 9px;
+  }
+
+  .row > * {
+    padding: 0 9px;
   }
 
   /* the four links no longer fit beside the logo — drop them to their own line */
@@ -365,16 +395,16 @@
   }
 
   .display {
-    font-size: 30px;
+    font-size: 38.9px;
   }
 
   .teamGrid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 24px 14px;
+    row-gap: 31.1px;
   }
 
   .instaRow {
-    padding: 44px 18px 0;
+    padding: 57px 18px 0;
   }
 }
 
