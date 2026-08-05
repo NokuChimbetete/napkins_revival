@@ -1,0 +1,425 @@
+/* /About-Us — a rebuild of the Cargo page at napkinseverywhere.com/About-Us.
+ *
+ * The original is Cargo's attribute grid: [grid-row] with twelve [grid-col]
+ * children, grid-pad="3" on each (so a 6px gutter between cells), and a
+ * 1-column spacer at both ends of every row. That is reproduced here with a
+ * plain CSS grid.
+ *
+ * Cargo's rendered root font-size is 12.96px — it sets `html { font-size: 81% }`
+ * from JavaScript, against the browser's 16px default. (An earlier version of
+ * this file assumed the nominal 10px, and so rendered everything at 1/1.296 of
+ * the original.) Its rem figures therefore land as: body copy 2rem = 25.92px,
+ * small 1.6rem = 20.74px, h2 6rem = 77.76px, page padding 3rem = 38.88px.
+ *
+ * The columns do not use a gap. Each cell carries 19.44px of inner padding
+ * (Cargo's grid-pad="3") and the row insets itself by the same amount, so a
+ * cell's content lines up with the page padding and two adjacent cells'
+ * contents sit 38.88px apart. Measured on the live page at a 1280 viewport:
+ * twelve columns of 102px, the first cell's content on 38.88px.
+ */
+
+.page {
+  min-height: 100vh;
+  background: #ffffff;
+  font-family: var(--font-inter), Helvetica, Arial, sans-serif;
+  font-size: 25.92px;
+  line-height: 1.3;
+  color: rgba(0, 0, 0, 0.85);
+  padding: 38.88px 0;
+}
+
+/* every section is one 12-column row; the 1-column gutters are spacers, so
+   content starts at column 2 and ends at column 11 */
+.row {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  padding: 0 19.44px;
+}
+
+/* the other half of Cargo's gutter: inner padding, not a gap */
+.row > * {
+  padding: 0 19.44px;
+}
+
+/* ---- nav ------------------------------------------------------------------
+   logo(1) + spacer(7) + four links at one column each = 12. */
+
+.navRow {
+  align-items: start;
+  margin-bottom: 59.6px;
+}
+
+.logo {
+  grid-column: 1 / span 1;
+  display: block;
+}
+
+.logo img {
+  width: 100%;
+  height: auto;
+}
+
+.navLink {
+  grid-column: span 1;
+  font-size: 15.552px;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  color: rgba(0, 0, 0, 0.85);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.navLink:first-of-type {
+  grid-column: 9 / span 1;
+}
+
+.navLink:hover {
+  color: #0071ad;
+}
+
+/* ---- headings -------------------------------------------------------------
+   "About Us" is a <small> on the original. It is an <h1> here so the page has
+   a real heading for screen readers and search, styled to match. */
+
+.eyebrow {
+  grid-column: 2 / span 11;
+  font-size: 20.736px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  color: rgba(0, 0, 0, 0.85);
+  margin: 0;
+}
+
+.display {
+  grid-column: 2 / span 8;
+  font-family: var(--font-averia), Georgia, serif;
+  font-size: 77.76px;
+  font-weight: 400;
+  line-height: 1.1;
+  color: #0071ad;
+  margin: 0;
+}
+
+.displayRow {
+  margin-bottom: 77.8px;
+}
+
+.teamHeadingRow {
+  margin: 129.6px 0 64.8px;
+}
+
+/* ---- narrative rows -------------------------------------------------------
+   image (5 cols) left, text (5 cols) right — all four rows, the original does
+   not alternate. */
+
+.narrativeRow {
+  align-items: start;
+  margin-bottom: 116.6px;
+}
+
+.narrativeImage {
+  grid-column: 2 / span 5;
+}
+
+.narrativeImage img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Centred against the image rather than sitting at its top. On a wide screen
+   the illustrations grow with their column while the text gets shorter — the
+   square one in the last row ends up around 200px taller than its paragraphs —
+   and a short block pinned to the top of a tall picture reads as unfinished.
+   `align-self` on the text alone, not `align-items` on the row: where the text
+   is the taller of the two (which it is at narrower widths) it sets the row
+   height and this does nothing, so the image never floats. */
+.narrativeText {
+  grid-column: 7 / span 5;
+  align-self: center;
+}
+
+.narrativeText p {
+  margin: 0 0 33.7px;
+}
+
+.narrativeText p:last-child {
+  margin-bottom: 0;
+}
+
+/* ---- team -----------------------------------------------------------------
+   On the original these are five grid-col="2" cells: 204px wide at a 1280
+   viewport, each with 19.44px of inner padding, so the photograph inside comes
+   out 165px. Reproduced as a span-10 track of five equal cells carrying that
+   same inner padding and no gap, which works out to the same widths.
+
+   The list stays flat and the cells simply wrap, so a sixteenth person starts
+   a new left-aligned row and deleting someone closes the gap — there is still
+   no row count anywhere to keep in sync. */
+
+.teamGrid {
+  grid-column: 2 / span 10;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  row-gap: 51.84px;
+  /* the cells carry the inner padding, so the track itself must not — on the
+     original the five cells are direct children of the row */
+  padding: 0;
+}
+
+.teamCell {
+  display: flex;
+  flex-direction: column;
+  padding: 0 19.44px;
+}
+
+/* square crop, so a photo of any shape can be dropped into team-data.ts
+   without distorting */
+.teamPhoto {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  margin-bottom: 13px;
+}
+
+.teamPhoto img {
+  object-fit: cover;
+}
+
+.teamName {
+  font-size: 20.736px;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.teamRole {
+  font-size: 20.736px;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  text-align: center;
+  color: #828282;
+}
+
+/* ---- learn more -----------------------------------------------------------
+   label(2) + links(6), with the label in the original's orange. */
+
+.learnRow {
+  margin-top: 142.6px;
+  align-items: start;
+}
+
+.learnLabel {
+  grid-column: 2 / span 2;
+  font-weight: 700;
+  color: #ff5900;
+}
+
+.learnLinks {
+  grid-column: 4 / span 6;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.learnLinks a {
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.85);
+  text-decoration: none;
+}
+
+.learnLinks a:hover {
+  color: #0071ad;
+}
+
+/* ---- instagram ------------------------------------------------------------
+   The glyph in the original's bottom-right corner is an Instagram icon-link,
+   matching the .instaRow on the Submit and Join pages. */
+
+.instaRow {
+  display: flex;
+  justify-content: flex-end;
+  padding: 116.6px 38.88px 0;
+}
+
+.instaRow a {
+  color: #828282;
+  display: flex;
+}
+
+.instaRow a:hover {
+  color: #0071ad;
+}
+
+/* ---- reveal ---------------------------------------------------------------
+   Lifted verbatim from the original stylesheet. Applied to the narrative
+   paragraphs — on the Cargo page all 20 .reveal elements wrap text, none wrap
+   images. Driven by src/components/about/Reveal.tsx. */
+
+.reveal {
+  position: relative;
+  transform: translateY(150px);
+  opacity: 0;
+  transition: 1s all ease;
+}
+
+.revealActive {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* ---- responsive -----------------------------------------------------------
+   The original is desktop-only (Cargo collapses it to a single column on a
+   phone). These steps keep the 12-column frame while there is room for it,
+   then stack. */
+
+@media (max-width: 1100px) {
+  .display {
+    font-size: 59.6px;
+  }
+
+  .teamGrid {
+    row-gap: 41.5px;
+  }
+}
+
+@media (max-width: 900px) {
+  .page {
+    font-size: 23.3px;
+    padding: 34px 0;
+  }
+
+  .row {
+    padding: 0 11.7px;
+  }
+
+  .row > * {
+    padding: 0 11.7px;
+  }
+
+  .logo {
+    grid-column: 1 / span 2;
+  }
+
+  .navLink {
+    grid-column: span 2;
+    font-size: 15.552px;
+  }
+
+  .navLink:first-of-type {
+    grid-column: 5 / span 2;
+  }
+
+  .display {
+    grid-column: 2 / span 10;
+    font-size: 49.2px;
+  }
+
+  /* stack the narrative rows: image over text, both full width */
+  .narrativeImage,
+  .narrativeText {
+    grid-column: 2 / span 10;
+  }
+
+  .narrativeImage {
+    margin-bottom: 31.1px;
+  }
+
+  .narrativeRow {
+    margin-bottom: 83px;
+  }
+
+  .teamGrid {
+    grid-template-columns: repeat(3, 1fr);
+    row-gap: 36.3px;
+  }
+
+  .teamHeadingRow {
+    margin: 70px 0 36px;
+  }
+
+  .learnRow {
+    margin-top: 76px;
+  }
+
+  .learnLabel {
+    grid-column: 2 / span 10;
+    margin-bottom: 10px;
+  }
+
+  .learnLinks {
+    grid-column: 2 / span 10;
+  }
+
+  .instaRow {
+    padding: 77.8px 23.3px 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .page {
+    font-size: 22px;
+  }
+
+  .row {
+    padding: 0 9px;
+  }
+
+  .row > * {
+    padding: 0 9px;
+  }
+
+  /* the four links no longer fit beside the logo — drop them to their own line */
+  .navRow {
+    grid-template-columns: repeat(4, 1fr);
+    row-gap: 4px;
+  }
+
+  .logo {
+    grid-column: 1 / span 4;
+    width: 56px;
+    margin-bottom: 14px;
+  }
+
+  .navLink,
+  .navLink:first-of-type {
+    grid-column: span 1;
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    padding: 6px 0;
+  }
+
+  .eyebrow,
+  .display,
+  .narrativeImage,
+  .narrativeText,
+  .teamGrid,
+  .learnLabel,
+  .learnLinks {
+    grid-column: 1 / span 12;
+  }
+
+  .display {
+    font-size: 38.9px;
+  }
+
+  .teamGrid {
+    grid-template-columns: repeat(2, 1fr);
+    row-gap: 31.1px;
+  }
+
+  .instaRow {
+    padding: 57px 18px 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    transform: none;
+    opacity: 1;
+    transition: none;
+  }
+}

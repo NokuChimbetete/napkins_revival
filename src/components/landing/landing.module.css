@@ -60,7 +60,9 @@
 
 .nav {
   position: absolute;
-  z-index: 2;
+  /* above .titleWrap: the wordmark PNG is transparent where these links show
+     through, so at an equal z-index it stayed visible but ate every click */
+  z-index: 3;
   top: 38px;
   right: 56px;
   display: flex;
