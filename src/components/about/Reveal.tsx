@@ -8,12 +8,14 @@ import styles from "@/app/About-Us/about.module.css";
  *
  * The original ran a scroll listener that added `.active` when
  * `getBoundingClientRect().top < innerHeight - 150`, and removed it again on
- * the way back up, so a block re-animates every time it re-enters. An
- * IntersectionObserver with a -150px bottom root margin fires on exactly that
- * boundary without running work on every scroll frame.
+ * the way back up, so a block faded out and re-animated every time it left and
+ * re-entered. That is not reproduced: once a paragraph has been read it stays
+ * on the page, and scrolling back up finds it where it was left rather than
+ * watching it dissolve. An IntersectionObserver fires on the same -150px
+ * boundary the original scrolled for, then stops watching that block for good.
  *
  * Reduced motion is handled in CSS: the media query pins the block visible, so
- * the class still toggles but paints nothing.
+ * the class still applies but paints nothing.
  */
 export default function Reveal({ children }: { children: React.ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -31,8 +33,16 @@ export default function Reveal({ children }: { children: React.ReactNode }) {
       return () => clearTimeout(t);
     }
 
+    // Unobserved as soon as it has shown, so nothing here runs again for the
+    // rest of the visit — and so the block can never be told to hide.
     const io = new IntersectionObserver(
-      ([entry]) => setActive(entry.isIntersecting),
+      (entries, observer) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          setActive(true);
+          observer.unobserve(entry.target);
+        }
+      },
       { rootMargin: "0px 0px -150px 0px" },
     );
     io.observe(el);

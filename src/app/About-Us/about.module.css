@@ -128,8 +128,16 @@
   display: block;
 }
 
+/* Centred against the image rather than sitting at its top. On a wide screen
+   the illustrations grow with their column while the text gets shorter — the
+   square one in the last row ends up around 200px taller than its paragraphs —
+   and a short block pinned to the top of a tall picture reads as unfinished.
+   `align-self` on the text alone, not `align-items` on the row: where the text
+   is the taller of the two (which it is at narrower widths) it sets the row
+   height and this does nothing, so the image never floats. */
 .narrativeText {
   grid-column: 7 / span 5;
+  align-self: center;
 }
 
 .narrativeText p {
