@@ -1078,19 +1078,69 @@
     --r: 9px;
   }
 
-  /* Every cell goes full width. Honk's artwork occupies the right half of a
-     16:9 image, so a cover-fit crop on a tall screen would show half a
-     rickshaw and none of the white the text needs to sit on. Below this width
-     each layer is contained and pinned to the bottom-right instead, which
-     turns the artwork into a corner motif and cannot overflow. */
+  /* Every cell goes full width. */
   .col {
     --from: 1 !important;
     --span: 12 !important;
   }
 
-  .layer img {
+  /* ---- the wallpapers on a phone -----------------------------------------
+     These used to be one rule — every layer contained and pinned bottom-right,
+     to keep Honk's rickshaw off the white the text sits on. The instinct was
+     right for three of the four acts and wrong for the fourth, and it broke
+     both of them in different ways.
+
+     Fractal is a photograph: 100% opaque, ink from edge to edge, and its white
+     type is written against its own rgba(0, 0, 0, 0.66) overlay. Containing a
+     3:2 photograph in a portrait viewport paints it 390x260 and leaves 584px
+     of empty layer above — which the overlay, being inset:0, still covered.
+     Two thirds of the screen became flat grey: 66% black over the stage's
+     white. It stays a full-bleed wallpaper here exactly as it is on the
+     desktop, which is the one thing that was never broken.
+
+     The other three are a blank field with the artwork confined to the right
+     of the frame — Honk's ink runs 59-99% across, Borde's 70-86%, and Chimera
+     is a 6%-opaque sheet with its doodle at 58-97%. On a desktop the text
+     column sits to the left of all that. At phone width the text is full
+     bleed, so there is no "beside" left: a full-width band of artwork fixed to
+     the viewport is guaranteed to have body copy scrolling over it. So the art
+     genuinely becomes a corner motif — a fraction of the screen, and stepped
+     back behind the type instead of competing with it. */
+
+  /* fractal keeps the base rule: object-fit: cover */
+
+  .layer:not([data-layer="fractal"]) {
+    /* the layer box itself shrinks into the corner, so `contain` has a corner
+       to fit into rather than the whole screen */
+    left: 38%;
+    top: 54%;
+  }
+
+  .layer:not([data-layer="fractal"]) img {
     object-fit: contain;
     object-position: right bottom;
+    /* the cross-fade owns .layer's opacity, so the step-back lives on the img */
+    opacity: 0.45;
+  }
+
+  /* ---- the pinned bar -----------------------------------------------------
+     It is fixed and was transparent at every width, so body copy scrolled
+     through the words rather than behind them. Tinted per act so it stays the
+     surface the act already has rather than introducing a new one.
+
+     The alpha does the occluding on its own and the blur is a bonus, not the
+     mechanism — a translucent bar that depends on backdrop-filter to stay
+     readable becomes smeared text wherever that is unsupported or switched off
+     to save battery, which is exactly the case a phone runs into. */
+  .navBar {
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .navBar[data-act="fractal"],
+  .photosPage .navBar {
+    background: rgba(20, 18, 16, 0.82);
   }
 
   /* The pile becomes a plain two-column grid. Dragging a photograph inside a

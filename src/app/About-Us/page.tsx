@@ -91,9 +91,6 @@ export default function AboutUsPage() {
         <Link href="/Events" className={styles.navLink}>
           EVENTS
         </Link>
-        <a href="mailto:napkinsmag@gmail.com" className={styles.navLink}>
-          CONTACT
-        </a>
       </div>
 
       <div className={styles.row}>
