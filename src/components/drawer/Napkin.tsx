@@ -1,8 +1,8 @@
 "use client";
 
 import { memo } from "react";
-import type { NapkinMeta } from "@/lib/playground";
-import styles from "./playground.module.css";
+import type { NapkinMeta } from "@/lib/drawer";
+import styles from "./drawer.module.css";
 
 /**
  * One napkin, absolutely placed on the pannable field at its hash-derived
@@ -23,7 +23,7 @@ function NapkinImpl({
   onPrefetch: (slug: string) => void;
 }) {
   const { look } = napkin;
-  const paperBase = `/playground/papers/paper-${look.variant}`;
+  const paperBase = `/drawer/papers/paper-${look.variant}`;
   const byline = napkin.author_name
     ? `${napkin.author_name}${napkin.class_year ? ` (${napkin.class_year})` : ""}`
     : "";

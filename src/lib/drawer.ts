@@ -16,7 +16,7 @@ import { supabaseConfigured } from "@/lib/supabase/configured";
 import { FONT_PRESET_COUNT, PAPER_COUNT } from "@/lib/napkin-constants";
 
 export type NapkinLook = {
-  /** 1-based paper index → /playground/papers/paper-N.webp */
+  /** 1-based paper index → /drawer/papers/paper-N.webp */
   variant: number;
   /** 1-based index into the NAPKIN_FONTS roster */
   fontPreset: number;
@@ -44,7 +44,7 @@ export type NapkinMeta = {
   look: NapkinLook;
 };
 
-export type PlaygroundPiece = {
+export type DrawerPiece = {
   entry: Entry;
   issue_number: number;
   season: string;
@@ -172,7 +172,7 @@ function seat(
 /** Every creative piece (front matter excluded), laid out in print order so the
  *  table reads oldest-at-the-top and new issues only ever extend it downward.
  *  ~15KB of metadata — piece bodies stay on the server until a napkin opens. */
-export async function getPlaygroundNapkins(): Promise<NapkinMeta[]> {
+export async function getDrawerNapkins(): Promise<NapkinMeta[]> {
   if (supabaseConfigured()) {
     try {
       const supabase = await createClient();
@@ -232,7 +232,7 @@ export async function getPlaygroundNapkins(): Promise<NapkinMeta[]> {
  *  This runs on every napkin click, so it is a single indexed lookup. It used
  *  to walk every issue — 17 queries and ~800KB — to find one row, which left
  *  the napkin sitting flipped for over a second after the 420ms flight. */
-export async function getPieceForPlayground(slug: string): Promise<PlaygroundPiece | null> {
+export async function getPieceForDrawer(slug: string): Promise<DrawerPiece | null> {
   if (supabaseConfigured()) {
     try {
       const supabase = await createClient();

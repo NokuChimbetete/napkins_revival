@@ -1,14 +1,14 @@
-// One-off prep for the Napkins Drawer (/playground).
+// One-off prep for the Napkins Drawer (/drawer).
 //
-//   node scripts/prep-playground-assets.mjs <papers-dir> <fonts-dir>
+//   node scripts/prep-drawer-assets.mjs <papers-dir> <fonts-dir>
 //
 // <papers-dir>: folder holding the 7 paper scans (1.png … 7.png).
 // <fonts-dir>:  the extracted "Napkins Fonts" folder.
 //
 // Papers are downscaled to max-width 640 and re-encoded WebP into
-// public/playground/papers/ (originals are ~1.4MB each — far too big for a
-// ~250px napkin). Fonts are copied into src/fonts/playground/ under clean
-// names; the roster here must stay in sync with src/app/playground/fonts.ts.
+// public/drawer/papers/ (originals are ~1.4MB each — far too big for a
+// ~250px napkin). Fonts are copied into src/fonts/drawer/ under clean
+// names; the roster here must stay in sync with src/app/drawer/fonts.ts.
 // The paper count (7) is permanent: napkin_variant = hash(slug) % 7 + 1, so
 // adding papers later would re-deal every napkin's look.
 
@@ -19,13 +19,13 @@ import process from "node:process";
 
 const [papersDir, fontsDir] = process.argv.slice(2);
 if (!papersDir || !fontsDir) {
-  console.error("usage: node scripts/prep-playground-assets.mjs <papers-dir> <fonts-dir>");
+  console.error("usage: node scripts/prep-drawer-assets.mjs <papers-dir> <fonts-dir>");
   process.exit(1);
 }
 
 const root = path.join(import.meta.dirname, "..");
-const papersOut = path.join(root, "public", "playground", "papers");
-const fontsOut = path.join(root, "src", "fonts", "playground");
+const papersOut = path.join(root, "public", "drawer", "papers");
+const fontsOut = path.join(root, "src", "fonts", "drawer");
 
 // 1024: the flip-to-modal animation scales a napkin up to ~1000px wide
 const MAX_WIDTH = 1024;

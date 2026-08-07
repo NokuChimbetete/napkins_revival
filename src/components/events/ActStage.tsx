@@ -80,7 +80,20 @@ export default function ActStage() {
                 quality={75}
                 // Fractal is on screen at first paint; the rest can wait.
                 priority={i === 0}
-                sizes="100vw"
+                // 100vw is only true where a layer fills the viewport. Below
+                // 700px Fractal is cover-fit on a portrait screen, so a 3:2
+                // photograph needs ~3.2x the viewport's width to reach edge to
+                // edge — asking for 100vw fetched an 828px file to paint 1266
+                // CSS px, and it arrived soft. 200vw rather than the 325vw the
+                // geometry literally asks for, because the source is 2200px and
+                // this layer sits under 66% black: past that there is nothing
+                // left to fetch and nothing left to see, only megabytes. The
+                // other three shrink to a corner motif here and want far less.
+                sizes={
+                  id === "fractal"
+                    ? "(max-width: 700px) 200vw, 100vw"
+                    : "(max-width: 700px) 62vw, 100vw"
+                }
               />
               {backdrop.overlay !== "rgba(0, 0, 0, 0)" && (
                 <div className={styles.layerOverlay} style={{ background: backdrop.overlay }} />

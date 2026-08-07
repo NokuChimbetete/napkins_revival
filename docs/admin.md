@@ -2,7 +2,7 @@
 
 Publishing an issue takes no code change and no redeploy. An editor signs in at
 `/admin`, builds the issue, presses Publish, and it is on the shelf and on the
-playground. This document is for whoever inherits it.
+drawer. This document is for whoever inherits it.
 
 ---
 
@@ -139,7 +139,7 @@ own probe account.
 
 **Slugs are immutable, and it matters more than it looks.** A slug decides a
 piece's permalink, its napkin's deep link, *and* its napkin's paper, font, tilt,
-size and position — all hashed from the slug in `src/lib/playground.ts`. The
+size and position — all hashed from the slug in `src/lib/drawer.ts`. The
 `pieces_freeze_slug()` trigger rejects any change. The admin never sends the
 slug on update, so renaming a piece is safe and the trigger never fires; the
 error message in `explain()` is a safety net, not a normal path.
@@ -154,10 +154,10 @@ node scripts/napkin-snapshot.mjs diff before.json
 ```
 
 Run this around anything that touches `pieces`. It reads the rendered
-`/playground` and compares paper, font, tilt, depth and position per slug.
+`/drawer` and compares paper, font, tilt, depth and position per slug.
 
 **Drafts are hidden in two places on purpose.** RLS policies *and* `.eq("status",
-"published")` in `getIssues()`, `getIssueContent()` and `getPlaygroundNapkins()`.
+"published")` in `getIssues()`, `getIssueContent()` and `getDrawerNapkins()`.
 Belt and braces: app-level filtering alone is one forgotten `.eq()` away from
 publishing someone's unfinished issue.
 

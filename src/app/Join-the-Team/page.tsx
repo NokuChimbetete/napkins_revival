@@ -42,9 +42,6 @@ export default function JoinTheTeamPage() {
           <Link href="/Events" className={styles.navLink}>
             EVENTS
           </Link>
-          <a href="mailto:napkinsmag@gmail.com" className={styles.navLink}>
-            CONTACT
-          </a>
         </nav>
       </div>
 

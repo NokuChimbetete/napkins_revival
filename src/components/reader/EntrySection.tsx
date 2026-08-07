@@ -43,7 +43,7 @@ export function EntryContent({ entry }: { entry: Entry }) {
 
 /** One piece, rendered under the Phase-2 design rules (verse no-wrap, wider
  *  measure, in-place galleries). Shared by the issue reader and the
- *  playground's napkin modal so the rules can't drift apart. */
+ *  drawer's napkin modal so the rules can't drift apart. */
 export function EntrySection({ entry }: { entry: Entry }) {
   const byline = entry.author_name
     ? `by ${entry.author_name}${entry.class_year ? ` (${entry.class_year})` : ""}`

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Averia_Serif_Libre, Inter, Lora } from "next/font/google";
-import { fieldSizeFor, getPieceForPlayground, getPlaygroundNapkins } from "@/lib/playground";
-import { NapkinsDrawer } from "@/components/playground/NapkinsDrawer";
+import { fieldSizeFor, getPieceForDrawer, getDrawerNapkins } from "@/lib/drawer";
+import { NapkinsDrawer } from "@/components/drawer/NapkinsDrawer";
 
 // the modal reuses the reader's EntrySection, whose CSS consumes these vars
 const averia = Averia_Serif_Libre({ variable: "--font-averia", subsets: ["latin"], weight: "400" });
@@ -12,7 +12,7 @@ type Props = { searchParams: Promise<{ piece?: string }> };
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
   const { piece } = await searchParams;
-  const opened = piece ? await getPieceForPlayground(piece) : null;
+  const opened = piece ? await getPieceForDrawer(piece) : null;
   return {
     title: opened
       ? `${opened.entry.title} — The Napkins Drawer`
@@ -22,11 +22,11 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   };
 }
 
-export default async function PlaygroundPage({ searchParams }: Props) {
+export default async function DrawerPage({ searchParams }: Props) {
   const { piece } = await searchParams;
-  const napkins = await getPlaygroundNapkins();
+  const napkins = await getDrawerNapkins();
   // deep-linked piece arrives server-rendered so a shared link opens instantly
-  const initialPiece = piece ? await getPieceForPlayground(piece) : null;
+  const initialPiece = piece ? await getPieceForDrawer(piece) : null;
 
   return (
     <div className={`${averia.variable} ${inter.variable} ${lora.variable}`}>

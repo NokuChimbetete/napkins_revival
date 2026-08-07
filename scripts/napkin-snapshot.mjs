@@ -1,5 +1,5 @@
 // Records exactly how every napkin is dealt — paper, font, tilt, size, depth,
-// field position — by reading the *rendered* /playground HTML, keyed by slug.
+// field position — by reading the *rendered* /drawer HTML, keyed by slug.
 //
 //   node scripts/napkin-snapshot.mjs capture <file>   record current state
 //   node scripts/napkin-snapshot.mjs diff <file>      compare current to a record
@@ -21,12 +21,12 @@ if (!["capture", "diff"].includes(mode) || !file) {
 
 const BASE = process.env.NAPKINS_BASE_URL ?? "http://localhost:3000";
 
-const res = await fetch(`${BASE}/playground`).catch((e) => {
-  console.error(`could not reach ${BASE}/playground — is the dev server running?\n  ${e.message}`);
+const res = await fetch(`${BASE}/drawer`).catch((e) => {
+  console.error(`could not reach ${BASE}/drawer — is the dev server running?\n  ${e.message}`);
   process.exit(1);
 });
 if (!res.ok) {
-  console.error(`${BASE}/playground returned HTTP ${res.status}`);
+  console.error(`${BASE}/drawer returned HTTP ${res.status}`);
   process.exit(1);
 }
 const html = await res.text();

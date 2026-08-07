@@ -28,7 +28,7 @@ export type Entry = {
   /** front matter (foreword, editor's note) — read in the issue, not on the drawer */
   is_frontmatter?: boolean;
   sort_order: number;
-  /** explicit napkin pairing from the DB; when absent the playground derives
+  /** explicit napkin pairing from the DB; when absent the drawer derives
    *  both deterministically from the slug (hash % count) */
   napkin_variant?: number | null;
   font_preset?: number | null;

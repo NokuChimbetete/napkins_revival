@@ -20,6 +20,17 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // The napkin drawer lived at /playground while it was being built, and the
+  // code called it that throughout while the page itself always said "The
+  // Napkins Drawer". The code now matches the page. These keep any link that
+  // was shared in the meantime working — permanent, because the old address
+  // is not coming back.
+  async redirects() {
+    return [
+      { source: "/playground", destination: "/drawer", permanent: true },
+      { source: "/playground/:path*", destination: "/drawer/:path*", permanent: true },
+    ];
+  },
 };
 
 export default nextConfig;

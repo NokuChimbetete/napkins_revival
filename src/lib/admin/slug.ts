@@ -5,9 +5,9 @@
  * and it is not being cautious. A slug decides:
  *
  *   · the piece's permalink        /issues/3#<slug>
- *   · its napkin's deep link       /playground?piece=<slug>
+ *   · its napkin's deep link       /drawer?piece=<slug>
  *   · its napkin's paper, font, tilt, size, position and parallax — all
- *     derived from a hash of the slug in src/lib/playground.ts
+ *     derived from a hash of the slug in src/lib/drawer.ts
  *
  * So renaming a piece to fix a typo, if the slug followed the title, would
  * silently re-skin and re-seat that napkin and 404 every link anyone has
