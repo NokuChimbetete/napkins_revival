@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { EstBadge } from "./EstBadge";
 import { SecretDoor } from "./SecretDoor";
 import styles from "./landing.module.css";
 
@@ -17,7 +18,7 @@ export function LandingHeader() {
           EVENTS
         </a>
       </nav>
-      <div className={styles.estBadge}>est. 2022</div>
+      <EstBadge />
       <SecretDoor />
       <div className={styles.titleWrap}>
         <Image

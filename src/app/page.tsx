@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getIssues } from "@/lib/issues";
 import { Bookshelf } from "@/components/landing/Bookshelf";
 import { InspirationWall } from "@/components/landing/InspirationWall";
+import { IntroAnimation } from "@/components/landing/IntroAnimation";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { SiteFooter } from "@/components/landing/SiteFooter";
 import { StickyNotes } from "@/components/landing/StickyNotes";
@@ -17,6 +18,9 @@ export default async function Home() {
 
   return (
     <div className={styles.page}>
+      {/* over the page, not in front of it: the landing page loads and paints
+          behind the card, so dismissing it reveals a page that is already there */}
+      <IntroAnimation />
       <VintageStrip />
       <LandingHeader />
       <div style={{ height: 52 }} />
