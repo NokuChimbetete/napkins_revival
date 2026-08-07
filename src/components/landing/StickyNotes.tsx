@@ -54,7 +54,7 @@ export function StickyNotes() {
       </a>
 
       <Link
-        href="/playground"
+        href="/drawer"
         className={styles.sticky}
         style={
           {

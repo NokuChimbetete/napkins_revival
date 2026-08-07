@@ -13,73 +13,73 @@ import { FONT_PRESET_COUNT } from "@/lib/napkin-constants";
 // spreads, no shared const — hence the repetition.
 
 const canarina = localFont({
-  src: "../../fonts/playground/canarina.woff2",
+  src: "../../fonts/drawer/canarina.woff2",
   display: "swap",
   preload: false,
   fallback: ["Georgia", "serif"],
 });
 const cmgeom = localFont({
-  src: "../../fonts/playground/cmgeom.woff2",
+  src: "../../fonts/drawer/cmgeom.woff2",
   display: "swap",
   preload: false,
   fallback: ["Georgia", "serif"],
 });
 const gulax = localFont({
-  src: "../../fonts/playground/gulax.woff2",
+  src: "../../fonts/drawer/gulax.woff2",
   display: "swap",
   preload: false,
   fallback: ["Georgia", "serif"],
 });
 const cakra = localFont({
-  src: "../../fonts/playground/cakra.woff2",
+  src: "../../fonts/drawer/cakra.woff2",
   display: "swap",
   preload: false,
   fallback: ["Georgia", "serif"],
 });
 const chaumont = localFont({
-  src: "../../fonts/playground/chaumont.woff2",
+  src: "../../fonts/drawer/chaumont.woff2",
   display: "swap",
   preload: false,
   fallback: ["Georgia", "serif"],
 });
 const hamlet = localFont({
-  src: "../../fonts/playground/hamlet.woff2",
+  src: "../../fonts/drawer/hamlet.woff2",
   display: "swap",
   preload: false,
   fallback: ["Georgia", "serif"],
 });
 const sweynheim = localFont({
-  src: "../../fonts/playground/sweynheim.woff2",
+  src: "../../fonts/drawer/sweynheim.woff2",
   display: "swap",
   preload: false,
   fallback: ["Georgia", "serif"],
 });
 const syneBold = localFont({
-  src: "../../fonts/playground/syne-bold.woff2",
+  src: "../../fonts/drawer/syne-bold.woff2",
   display: "swap",
   preload: false,
   fallback: ["Georgia", "serif"],
 });
 const syneTactile = localFont({
-  src: "../../fonts/playground/syne-tactile.woff2",
+  src: "../../fonts/drawer/syne-tactile.woff2",
   display: "swap",
   preload: false,
   fallback: ["Georgia", "serif"],
 });
 const leagueScript = localFont({
-  src: "../../fonts/playground/league-script.woff",
+  src: "../../fonts/drawer/league-script.woff",
   display: "swap",
   preload: false,
   fallback: ["Georgia", "serif"],
 });
 const ltStopwatch = localFont({
-  src: "../../fonts/playground/lt-stopwatch.ttf",
+  src: "../../fonts/drawer/lt-stopwatch.ttf",
   display: "swap",
   preload: false,
   fallback: ["Georgia", "serif"],
 });
 const sansitaSwashed = localFont({
-  src: "../../fonts/playground/sansita-swashed.ttf",
+  src: "../../fonts/drawer/sansita-swashed.ttf",
   display: "swap",
   preload: false,
   fallback: ["Georgia", "serif"],

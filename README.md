@@ -1,7 +1,7 @@
 # Napkins
 
 An art zine for Minervans by Minervans. Digital home for the magazine: a bookshelf of
-published issues, an immersive per-issue reader, and a playground of individual pieces —
+published issues, an immersive per-issue reader, and a drawer of individual pieces —
 plus a hidden admin pipeline for uploading new content.
 
 ## Stack
@@ -15,7 +15,7 @@ plus a hidden admin pipeline for uploading new content.
 |---|---|
 | `/` | Bookshelf of all published issues |
 | `/issues/[issueNumber]` | Full-issue reader |
-| `/playground` | Scattered napkins, one per piece; click to read |
+| `/drawer` | Scattered napkins, one per piece; click to read |
 | `/napkin-drawer` | Hidden staff login (magic link) |
 | `/admin` | Upload dashboard (whitelisted admins only) |
 
@@ -40,5 +40,5 @@ npm run dev
 
 1. **Bookshelf** — landing page, covers face forward, click through to an issue
 2. **Reader** — pre-rendered page images, spread view on desktop, single page on mobile
-3. **Playground** — seeded scatter of napkins, funky type, PDF modal via react-pdf
+3. **Drawer** — seeded scatter of napkins, funky type, PDF modal via react-pdf
 4. **Admin** — magic-link login, issue upload + batch piece upload straight to Supabase

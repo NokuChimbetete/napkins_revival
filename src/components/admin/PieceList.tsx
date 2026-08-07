@@ -29,10 +29,10 @@ import styles from "./issues.module.css";
 /**
  * Print order, by dragging.
  *
- * This is also the order napkins are seated on the playground table, so
+ * This is also the order napkins are seated on the drawer table, so
  * reordering an issue moves its napkins — within that issue's own rows only,
  * because seating is by issue number first (see assignFieldPositions in
- * src/lib/playground.ts). Nothing from another issue shifts.
+ * src/lib/drawer.ts). Nothing from another issue shifts.
  *
  * The order is written optimistically and reconciled on the server response: a
  * list that snaps back to its old order for half a second while a round-trip

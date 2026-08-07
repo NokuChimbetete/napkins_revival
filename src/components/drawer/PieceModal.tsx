@@ -2,9 +2,9 @@
 
 import { useEffect, useRef } from "react";
 import Link from "next/link";
-import type { PlaygroundPiece } from "@/lib/playground";
+import type { DrawerPiece } from "@/lib/drawer";
 import { EntrySection } from "@/components/reader/EntrySection";
-import styles from "./playground.module.css";
+import styles from "./drawer.module.css";
 
 /**
  * The "other side" of a napkin: the full piece, rendered with the reader's
@@ -18,7 +18,7 @@ export function PieceModal({
   piece,
   onClose,
 }: {
-  piece: PlaygroundPiece | null;
+  piece: DrawerPiece | null;
   onClose: () => void;
 }) {
   const ref = useRef<HTMLDialogElement>(null);

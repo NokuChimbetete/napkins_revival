@@ -355,11 +355,11 @@ export async function deletePiece(id: string, confirmation: string): Promise<Res
   const { error } = await supabase.from("pieces").delete().eq("id", id);
   if (error) return bad(explain(error));
   if (piece.issue_id) revalidatePath(`/admin/issues/${piece.issue_id}`);
-  revalidatePath("/playground");
+  revalidatePath("/drawer");
   return ok;
 }
 
-/** Print order. Also the order napkins are seated on the playground table, so
+/** Print order. Also the order napkins are seated on the drawer table, so
  *  reordering an issue moves its napkins — but only within their own rows. */
 export async function reorderPieces(issueId: string, orderedIds: string[]): Promise<Result> {
   await assertAdmin();
@@ -375,7 +375,7 @@ export async function reorderPieces(issueId: string, orderedIds: string[]): Prom
   }
 
   revalidatePath(`/admin/issues/${issueId}`);
-  revalidatePath("/playground");
+  revalidatePath("/drawer");
   return ok;
 }
 
@@ -415,7 +415,7 @@ async function revalidatePiece(id: string) {
 /** The three public surfaces a content change can reach. */
 function revalidateEverything(issueNumber?: number) {
   revalidatePath("/");
-  revalidatePath("/playground");
+  revalidatePath("/drawer");
   revalidatePath("/admin");
   if (issueNumber) revalidatePath(`/issues/${issueNumber}`);
 }

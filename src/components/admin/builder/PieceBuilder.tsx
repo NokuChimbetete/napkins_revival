@@ -290,7 +290,7 @@ export function PieceBuilder({
         open={deleting}
         name={piece.title}
         kind="piece"
-        detail="This piece will be deleted permanently, along with its place on the playground. Student work is often only stored here — if you're not sure, set it back to draft instead."
+        detail="This piece will be deleted permanently, along with its place on the drawer. Student work is often only stored here — if you're not sure, set it back to draft instead."
         busy={pending}
         error={error}
         onCancel={() => setDeleting(false)}

@@ -2,10 +2,10 @@
 
 **Goal:** after this work, publishing a new issue must require *zero code changes
 and zero redeploys, forever*. An editor with no technical background adds the
-issue in the admin dashboard, and the reader (`/issues/[n]`) and the playground
-(`/playground`) both pick it up on the next page load.
+issue in the admin dashboard, and the reader (`/issues/[n]`) and the drawer
+(`/drawer`) both pick it up on the next page load.
 
-The playground was built for this. Its layout is already future-proof: napkins
+The drawer was built for this. Its layout is already future-proof: napkins
 are seated in print order, so a new issue only ever appends rows to the bottom
 of the table and every existing napkin keeps its exact position. What is *not*
 done is the data path — content still comes from JSON fixtures compiled into
@@ -18,7 +18,7 @@ the bundle.
 - `getIssueContent()` and `getIssues()` query Supabase first and fall back to
   fixtures only because the env vars are still placeholders
   (`supabaseConfigured()` checks for `your-project-ref` / `your-` prefixes).
-- `/playground` and `/issues/[n]` are dynamic (server-rendered per request), so
+- `/drawer` and `/issues/[n]` are dynamic (server-rendered per request), so
   database changes appear without a rebuild.
 - RLS is correct: `issues` and `pieces` are public-read, admin-write.
 - A napkin's paper, font, tilt, and depth are derived from a hash of the piece's
@@ -64,7 +64,7 @@ alter table pieces alter column font_preset    drop not null,
 ```
 
 Do **not** change `PAPER_COUNT` (7) in `src/lib/napkin-constants.ts` or reorder
-`NAPKIN_FONTS` (14) in `src/app/playground/fonts.ts` — both are indexes into a
+`NAPKIN_FONTS` (14) in `src/app/drawer/fonts.ts` — both are indexes into a
 hash, so any change re-deals every napkin in the archive.
 
 ---
@@ -76,7 +76,7 @@ hash, so any change re-deals every napkin in the archive.
 URL shared so far) uses `the-ascension-by-zhi-zhi-chia-m25`.
 
 The slug is not cosmetic. It determines the napkin's **paper, font, tilt, depth,
-parallax**, its **deep link** (`/playground?piece=<slug>`), and its **anchor in
+parallax**, its **deep link** (`/drawer?piece=<slug>`), and its **anchor in
 the reader** (`/issues/3#<slug>`). Changing slugs on migration would silently
 re-skin the whole table and 404 every link anyone has shared.
 
@@ -129,7 +129,7 @@ redeploy per issue, which defeats the whole goal.
 
 ## 7. Remove the hardcoded issue list
 
-`src/lib/playground.ts` iterates `const ISSUE_NUMBERS = [1..8]`. Derive it from
+`src/lib/drawer.ts` iterates `const ISSUE_NUMBERS = [1..8]`. Derive it from
 the issues table instead (`getIssues()` already returns them, sorted).
 
 The fixtures (`FIXTURES` map in `issue-content.ts`, `FALLBACK_ISSUES` in
@@ -168,7 +168,7 @@ would scramble the table.
 ## 10. Acceptance tests
 
 1. **Nothing changed for existing work.** With Supabase configured and seeded,
-   `/playground` shows the same 110 napkins, each with the same
+   `/drawer` shows the same 110 napkins, each with the same
    `data-variant` / `data-preset` and the same `left`/`top`, as the fixture
    build. Diff the rendered HTML per slug before and after.
 2. **Publishing is code-free.** Add a test issue 9 through the admin only. Its
@@ -177,7 +177,7 @@ would scramble the table.
    edited and no deploy is run.
 3. **Formatting survived.** Open a poem in the drawer modal — line breaks intact,
    no wrapping. Open a piece with a gallery — it scroll-snaps.
-4. **Links survived.** `/playground?piece=the-ascension-by-zhi-zhi-chia-m25`
+4. **Links survived.** `/drawer?piece=the-ascension-by-zhi-zhi-chia-m25`
    opens the modal, and `/issues/1#the-ascension-by-zhi-zhi-chia-m25` jumps to
    the piece.
 5. **Images load from Storage,** not from `public/issues/`.

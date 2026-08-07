@@ -272,7 +272,7 @@ export function IssueEditor({
           </section>
 
           <p className={ui.notice}>
-            Pieces appear on the playground automatically once they and this issue are published.
+            Pieces appear on the drawer automatically once they and this issue are published.
             There is no separate step for the drawer.
           </p>
         </aside>

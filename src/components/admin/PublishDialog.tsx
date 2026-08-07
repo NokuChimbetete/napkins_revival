@@ -9,7 +9,7 @@ import ui from "./ui.module.css";
  * the consequences are not obvious from the button:
  *
  *  · the issue takes first position on the bookshelf, pushing everything down
- *  · its pieces appear on the playground immediately — there is no separate
+ *  · its pieces appear on the drawer immediately — there is no separate
  *    step for that, and no way to publish an issue while holding a piece back
  *    other than leaving that piece as a draft
  */
@@ -73,7 +73,7 @@ function Dialog({ issue, highest, busy, error, onCancel, onConfirm }: Props) {
                     whitespace around a newline entirely, which silently glues
                     "pieces" to "become" */}
                 <strong>{going}</strong>
-                {`${going === 1 ? " piece becomes" : " pieces become"} readable, and any that aren’t front matter appear on the playground straight away.`}
+                {`${going === 1 ? " piece becomes" : " pieces become"} readable, and any that aren’t front matter appear on the drawer straight away.`}
               </>
             ) : (
               <>The issue has no publishable pieces yet, so the shelf entry will open empty.</>

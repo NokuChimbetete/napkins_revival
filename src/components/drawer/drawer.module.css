@@ -35,7 +35,7 @@
   left: -1024px;
   width: calc(100% + 2048px);
   height: calc(100% + 2048px);
-  background: url("/playground/wood.webp") repeat;
+  background: url("/drawer/wood.webp") repeat;
   background-size: 512px 512px;
   will-change: transform;
 }

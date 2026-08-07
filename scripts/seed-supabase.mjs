@@ -18,7 +18,7 @@
 // THE RULE THIS SCRIPT EXISTS TO KEEP: a piece's slug is copied from the
 // fixture verbatim and napkin_variant/font_preset are left NULL. The slug
 // decides each napkin's paper, font, tilt and position, and NULL is what makes
-// the playground derive them by hash. Regenerate either and the whole table
+// the drawer derive them by hash. Regenerate either and the whole table
 // re-deals and every shared link breaks.
 
 import fs from "node:fs";

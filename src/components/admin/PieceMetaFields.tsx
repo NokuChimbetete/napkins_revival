@@ -16,7 +16,7 @@ import ui from "./ui.module.css";
  *    so choosing "Poetry" is also a layout decision. The verse checkbox exists
  *    for the poem filed under "Nonfiction" — one archive piece is exactly that.
  *
- *  · Front matter keeps a foreword off the playground. It is a real column, not
+ *  · Front matter keeps a foreword off the drawer. It is a real column, not
  *    a magic category string, so it survives an editor typing "Editor's Note".
  */
 export function PieceMetaFields({
@@ -161,7 +161,7 @@ export function PieceMetaFields({
           Front matter
           <br />
           <span className={ui.hint}>
-            Forewords and editors&rsquo; notes. Read inside the issue, kept off the playground.
+            Forewords and editors&rsquo; notes. Read inside the issue, kept off the drawer.
           </span>
         </span>
       </label>

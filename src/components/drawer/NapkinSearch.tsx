@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
-import type { NapkinMeta } from "@/lib/playground";
-import styles from "./playground.module.css";
+import type { NapkinMeta } from "@/lib/drawer";
+import styles from "./drawer.module.css";
 
 const fold = (s: string) =>
   s

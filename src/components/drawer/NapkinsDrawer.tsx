@@ -2,17 +2,17 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
-import type { FieldSize, NapkinMeta, PlaygroundPiece } from "@/lib/playground";
-import { NAPKIN_FONTS } from "@/app/playground/fonts";
+import type { FieldSize, NapkinMeta, DrawerPiece } from "@/lib/drawer";
+import { NAPKIN_FONTS } from "@/app/drawer/fonts";
 import { Napkin } from "./Napkin";
 import { NapkinSearch } from "./NapkinSearch";
 import { PieceModal } from "./PieceModal";
-import styles from "./playground.module.css";
+import styles from "./drawer.module.css";
 
 /**
  * The drawer is an infinite wooden table. The motion engine is a faithful
  * port of the Framer "Infinite Canvas" component running (at its default
- * props) on emmiwu.com/playground, extracted from its published source:
+ * props) on emmiwu.com/drawer, extracted from its published source:
  *
  *   wheel:  target -= delta * 0.4 (both axes)
  *   drag:   target = dragStart + (pointer - pointerStart) * 0.5, no throw —
@@ -65,7 +65,7 @@ const WOOD_TILE = 512;
 // exactly or the infinite wrap tears (napkins jump, or double up on screen).
 
 const urlFor = (slug?: string | null) =>
-  slug ? `/playground?piece=${encodeURIComponent(slug)}` : "/playground";
+  slug ? `/drawer?piece=${encodeURIComponent(slug)}` : "/drawer";
 
 const prefersReducedMotion = () =>
   typeof window !== "undefined" &&
@@ -100,10 +100,10 @@ export function NapkinsDrawer({
   field,
 }: {
   napkins: NapkinMeta[];
-  initialPiece: PlaygroundPiece | null;
+  initialPiece: DrawerPiece | null;
   field: FieldSize;
 }) {
-  const [openPiece, setOpenPiece] = useState<PlaygroundPiece | null>(initialPiece);
+  const [openPiece, setOpenPiece] = useState<DrawerPiece | null>(initialPiece);
   const [openSlug, setOpenSlug] = useState<string | null>(initialPiece?.entry.slug ?? null);
   const [hintGone, setHintGone] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -113,7 +113,7 @@ export function NapkinsDrawer({
   const woodRef = useRef<HTMLDivElement>(null);
   const dotRef = useRef<HTMLDivElement>(null);
 
-  const cache = useRef<Map<string, PlaygroundPiece>>(
+  const cache = useRef<Map<string, DrawerPiece>>(
     new Map(initialPiece ? [[initialPiece.entry.slug, initialPiece]] : [])
   );
   // scroll state, exactly the reference component's shape
@@ -471,20 +471,20 @@ export function NapkinsDrawer({
   // ---- open / close with the flight ------------------------------------
 
   // in-flight requests, so hover + pointerdown + click don't fire three fetches
-  const inflight = useRef(new Map<string, Promise<PlaygroundPiece>>());
+  const inflight = useRef(new Map<string, Promise<DrawerPiece>>());
 
-  const fetchPiece = useCallback(async (slug: string): Promise<PlaygroundPiece> => {
+  const fetchPiece = useCallback(async (slug: string): Promise<DrawerPiece> => {
     const cached = cache.current.get(slug);
     if (cached) return cached;
     const pending = inflight.current.get(slug);
     if (pending) return pending;
     const req = (async () => {
-      const res = await fetch(`/playground/piece/${encodeURIComponent(slug)}`);
+      const res = await fetch(`/drawer/piece/${encodeURIComponent(slug)}`);
       if (!res.ok) throw new Error(`piece fetch failed: ${res.status}`);
-      return (await res.json()) as PlaygroundPiece;
+      return (await res.json()) as DrawerPiece;
     })();
     inflight.current.set(slug, req);
-    let piece: PlaygroundPiece;
+    let piece: DrawerPiece;
     try {
       piece = await req;
     } finally {
