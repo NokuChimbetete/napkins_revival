@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { supabaseConfigured } from "@/lib/supabase/configured";
 
 export type SignInState = { error?: string };
 
@@ -21,6 +22,18 @@ export type SignInState = { error?: string };
  */
 export async function signInWithGoogle(_prev: SignInState, formData: FormData): Promise<SignInState> {
   const next = String(formData.get("next") ?? "/admin");
+
+  // Before anything touches Supabase. createClient() throws outright on missing
+  // keys, and a throw inside a Server Action reaches the editor as a blank
+  // "a server error occurred" page with no clue what to do. A deployment whose
+  // env vars were never filled in is the likeliest way to arrive here.
+  if (!supabaseConfigured()) {
+    return {
+      error:
+        "This deployment isn’t connected to the database — NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are missing. Add them under Settings → Environment Variables in Vercel, then redeploy.",
+    };
+  }
+
   const supabase = await createClient();
   const origin = process.env.NEXT_PUBLIC_SITE_URL ?? (await siteOrigin());
 
