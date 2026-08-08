@@ -9,8 +9,14 @@ import { createClient } from "@/lib/supabase/client";
  *
  * Images are converted to WebP and capped in size on the way, because the
  * archive convention is .webp and because a phone photo straight off a camera
- * is 6MB of something that will be displayed 680px wide. Conversion uses the
- * canvas the browser already has — no dependency, and nothing to keep patched.
+ * is 6000px of something no redesign will ever need. Conversion uses the canvas
+ * the browser already has — no dependency, and nothing to keep patched.
+ *
+ * One caveat that no quality setting can fix: a canvas round-trip converts to
+ * sRGB and drops any embedded ICC profile. Artwork exported from InDesign or a
+ * PDF in Adobe RGB or Display P3 will shift colour on upload no matter what.
+ * Exporting as sRGB in the first place is the fix; the alternative is storing
+ * the original bytes untouched, which the .webp path convention rules out.
  */
 
 /** Matches the existing archive layout: piece-images/{issue}/{slug}/{name}.webp */
@@ -19,10 +25,34 @@ export const piecePath = (issueNumber: number, slug: string, name: string) =>
 
 export const coverPath = (issueNumber: number) => `cover-issue-${issueNumber}.webp`;
 
-/** The widest a body image is ever displayed is 680px, and covers 420px, but
- *  originals are kept generous enough to survive a future redesign and 2× DPR. */
-const MAX_EDGE = 2000;
-const QUALITY = 0.86;
+/**
+ * What goes into Storage is a MASTER, not a delivery copy.
+ *
+ * Every image is re-encoded on its way to the reader — `optimizeBodyImages`
+ * routes it through Next's optimizer, which serves AVIF (falling back to WebP)
+ * at q75 and at most 1200px wide. Compressing again here would only spend
+ * quality that the delivery encode then has to compress a second time, and
+ * lossy-on-lossy compounds: the ringing from the first pass becomes signal the
+ * second pass faithfully preserves. So the master stays pristine and the
+ * optimizer makes the small copies.
+ *
+ * quality 1.0 is not "very high" — in Chromium and Firefox it switches the WebP
+ * encoder to true lossless. Measured against the source pixel by pixel: RMSE
+ * 0.00, worst channel error 0. At 0.86 the worst error was 53/255, landing on
+ * hairline strokes and the edges of small type — exactly what zine pages are
+ * made of.
+ *
+ * The cost is real and worth knowing: lossless is ~7× the bytes on flat
+ * artwork (~0.8MB for a full page) and ~4.5× that again on photographs
+ * (~7MB at this edge length). Storage, not page weight — readers still get
+ * the small AVIF.
+ *
+ * AVIF is deliberately not attempted here: no browser can encode it from a
+ * canvas, and `toBlob` answers an unsupported type by silently handing back a
+ * PNG (3.3× larger than lossless WebP) rather than failing.
+ */
+const MAX_EDGE = 2600;
+const QUALITY = 1;
 
 export type UploadResult = { url: string; width: number; height: number };
 
