@@ -22,12 +22,23 @@ export function LandingHeader() {
       <SecretDoor />
       <div className={styles.titleWrap}>
         <Image
-          src="/assets/napkins-title.png"
-          alt="NAPKINS paper cut-out wordmark"
-          width={814}
-          height={260}
+          src="/assets/napkins-title.webp"
+          alt="NAPKINS, spelled out in cut-and-torn paper letters, with the N drawn inside a hand-sketched napkin"
+          width={1876}
+          height={600}
           priority
-          sizes="(max-width: 700px) 86vw, (max-width: 1023px) 84vw, 940px"
+          // Served exactly as it is, not through the image optimiser, because
+          // the optimiser re-encodes to AVIF or WebP at quality 75 and this is
+          // a lossless WebP.
+          //
+          // The file is mastered at 1876px for that reason: twice the 938px
+          // the desktop rule draws it at. Skipping the optimiser also skips the
+          // resampled derivatives it would have generated, so whatever is
+          // shipped is what the browser has to scale down itself — and a
+          // browser downscaling by 3x, as it was from a 2423px master, uses a
+          // cheap filter and comes out soft. At 2x on a 1x screen and 1:1 on a
+          // 2x one, there is nothing left for it to blur.
+          unoptimized
           className={styles.titleImg}
         />
         <div className={styles.tagline}>
