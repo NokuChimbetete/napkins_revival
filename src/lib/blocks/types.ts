@@ -45,7 +45,21 @@ export type ImageRef = { src: string; alt: string; width?: number; height?: numb
 
 type Base = { id: string };
 
-export type TextBlock = Base & { type: "text"; text: string; wrap?: Wrap };
+/** Reading sizes, as steps rather than free pixels: a zine with nine slightly
+ *  different body sizes in it looks like a mistake, not a choice. Absent is the
+ *  reader's own 18px. Named `size-*` and not `text-*` because Tailwind 4 is
+ *  loaded in this app and owns `text-sm` / `text-lg`. */
+export type TextSize = "sm" | "lg" | "xl";
+
+export type TextBlock = Base & {
+  type: "text";
+  text: string;
+  wrap?: Wrap;
+  /** the words under a picture: two points down from body copy, and italic */
+  caption?: true;
+  /** an explicit size, overriding both body copy and the caption default */
+  size?: TextSize;
+};
 
 export type ImageBlock = Base & {
   type: "image";

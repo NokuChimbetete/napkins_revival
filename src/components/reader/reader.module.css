@@ -219,6 +219,34 @@
   white-space: normal;
 }
 
+/* ---- caption and reading size -------------------------------------------
+   Both ride on a <span> around a whole text block (see src/lib/blocks/render.ts).
+   `size-*` rather than `text-*`: Tailwind 4 is loaded in this app and owns
+   `text-sm` / `text-lg`, so those names would be fought over. */
+
+/* Two points down from the 18px body, and italic — the words under a picture
+   should read as an aside, not as another paragraph of the piece. */
+.bodyHtml :global(.caption) {
+  font-size: 16px;
+  font-style: italic;
+  line-height: 1.55;
+}
+
+/* An explicit size wins over the caption default — it comes second in the
+   class attribute and later here — so a long caption can be dropped further
+   without losing the italic. */
+.bodyHtml :global(.size-sm) {
+  font-size: 16px;
+}
+
+.bodyHtml :global(.size-lg) {
+  font-size: 21px;
+}
+
+.bodyHtml :global(.size-xl) {
+  font-size: 25px;
+}
+
 .bodyHtml :global(.align-left) {
   text-align: left;
 }

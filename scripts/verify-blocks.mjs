@@ -168,12 +168,22 @@ const ATTACKS = [
   ["<img src=\"/a.png\" style=\"width:expression(alert(1))\">", /expression/i],
   ["<img src=\"/a.png\" style=\"width:999%\">", /999/],
   ["<div class=\"align-left\" style=\"opacity:0\">x</div>", /opacity|style=/i],
+  // <span> exists only to carry caption/size. Any other class, or any other
+  // attribute on it, has to be dropped.
+  ["<span onclick=\"steal()\">x</span>", /onclick/i],
+  ["<span class=\"caption\" onmouseover=\"go()\">x</span>", /onmouseover/i],
+  ["<span class=\"anything-else\">x</span>", /anything-else/],
+  ["<span class=\"caption size-9999\">x</span>", /9999/],
+  ["<span class=\"caption\" style=\"position:fixed\">x</span>", /position|style=/i],
 ];
 
 /** …and the one thing it must NOT strip. */
 const MUST_SURVIVE = [
   ["<img src=\"/a.png\" alt=\"\" style=\"width:30%\">", /style="width:30%"/],
   ["<div class=\"align-left\">x</div>", /class="align-left"/],
+  ["<span class=\"caption\">x</span>", /class="caption"/],
+  ["<span class=\"caption size-sm\">x</span>", /class="caption size-sm"/],
+  ["<span class=\"size-lg\">x</span>", /class="size-lg"/],
 ];
 
 console.log("\nsanitizer, against things it must refuse");

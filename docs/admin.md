@@ -223,6 +223,49 @@ archive pieces depend on that. It is left alone.
 
 ---
 
+## Captions and reading size
+
+A text block carries two optional properties, both rendered as a `<span>`
+around the whole run rather than as a class on a wrapper div — a text block
+often has no wrapper, and inventing one would change the block-level layout of
+everything already published.
+
+- `caption: true` → `.caption`, **16px and italic** (two points down from the
+  18px body). It is what the "Image + caption" block sets on its text half, and
+  the **Caption** button in the builder toggles it on any text block.
+- `size: "sm" | "lg" | "xl"` → `.size-sm` / `.size-lg` / `.size-xl` (16 / 21 /
+  25px). Absent is the reader's 18px. Named `size-*` and **not** `text-*`
+  because Tailwind 4 is loaded in this app and owns `text-sm` and `text-lg`.
+
+An explicit size beats the caption default — it comes second in the class
+attribute and second in the stylesheet — so a long caption can be dropped
+further without losing the italic.
+
+`<span>` exists in the sanitizer's allowlist *only* to carry these two, matched
+whole against `SPAN_CLASS`. `verify-blocks.mjs` has cases proving nothing else
+rides in on it.
+
+### The retroactive migration
+
+`scripts/migrate-captions.mjs` marked the captions that already existed. The
+rule is deliberately narrow: **a text block inside a `group` whose previous
+sibling is an image, and which has visible text.** That is exactly the shape
+the "Image + caption" button produces. It found 9, in 3 pieces.
+
+The same "text after an image" shape appears in two other places and was left
+alone on purpose:
+
+- **inside a row column** (16 cases) — mixed. Some really are captions, but
+  `tuchan-by-yufei-xiao-m23` has 950-character paragraphs of body prose there.
+- **at the top level** (19 cases) — body prose, up to 4,150 characters.
+
+Guessing on those would have silently shrunk somebody's essay. Editors can mark
+any of them by hand with the Caption button.
+
+Empty caption slots were skipped too: fifteen figures have never had a caption
+written, and marking one would wrap a lone `<br>` in a span — changing the
+stored HTML of six published pieces so a reader sees precisely nothing.
+
 ## Adding an editor
 
 Insert their email into `admin_whitelist` in the Supabase SQL editor:
@@ -248,4 +291,5 @@ Without it the magic link lands nowhere.
 | `node scripts/verify-blocks.mjs` | Block format is lossless; sanitizer holds |
 | `node scripts/verify-rls.mjs` | Non-editors are refused by Postgres |
 | `node scripts/migrate-blocks.mjs --dry` | What a re-migration would rewrite |
+| `node scripts/migrate-captions.mjs --dry` | Which figure captions would get caption styling |
 | `node scripts/napkin-snapshot.mjs capture\|diff <file>` | No napkin moved |
