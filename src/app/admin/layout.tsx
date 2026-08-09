@@ -30,12 +30,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       <section className={styles.gate}>
         <span className={styles.mark}>Napkins Admin</span>
-        <h1 className={styles.title}>This one needs a bigger desk.</h1>
+        <h1 className={styles.title}>This one needs a bigger screen.</h1>
         <p className={styles.body}>
-          Issues get added, edited and deleted from a computer. Laying out an
-          issue on a phone was never going to be pleasant, so we didn&rsquo;t
-          pretend otherwise — open this page again on a desktop and everything
-          will be here.
+          Phones are for doom scrolling, not for editing zines you silly goose.
+          Admin panel only works on desktop with a full-sized browser window.
         </p>
         <Link href="/" className={styles.back}>
           ← Back to the shelf
