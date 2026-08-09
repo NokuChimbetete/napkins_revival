@@ -50,65 +50,67 @@ function Dialog({ issue, highest, busy, error, onCancel, onConfirm }: Props) {
       onMouseDown={(e) => e.target === e.currentTarget && onCancel()}
     >
       <div className={ui.modal} role="dialog" aria-modal="true">
-        <h2 className={ui.modalTitle}>Publish “{issue.title}”?</h2>
+        <div className={ui.modalScroll}>
+          <h2 className={ui.modalTitle}>Publish “{issue.title}”?</h2>
 
-        <div className={ui.modalBody}>
-          <p style={{ margin: "0 0 10px" }}>
-            {willBeFirst ? (
-              <>
-                It goes to <strong>first position on the bookshelf</strong>, and every other issue
-                shifts one place right.
-              </>
-            ) : (
-              <>
-                It sits at position {highest - issue.issue_number + 1} on the shelf — issue{" "}
-                {highest} is higher-numbered, so that one stays first.
-              </>
-            )}
-          </p>
-          <p style={{ margin: "0 0 10px" }}>
-            {going > 0 ? (
-              <>
-                {/* one expression, not text split across lines: JSX drops the
-                    whitespace around a newline entirely, which silently glues
-                    "pieces" to "become" */}
-                <strong>{going}</strong>
-                {`${going === 1 ? " piece becomes" : " pieces become"} readable, and any that aren’t front matter appear on the drawer straight away.`}
-              </>
-            ) : (
-              <>The issue has no publishable pieces yet, so the shelf entry will open empty.</>
-            )}
-          </p>
-          {!issue.cover_url && (
-            <p className={ui.error} style={{ margin: "12px 0 0" }}>
-              This issue has no cover yet. Add one first — the bookshelf has nothing to show
-              without it.
+          <div className={ui.modalBody}>
+            <p style={{ margin: "0 0 10px" }}>
+              {willBeFirst ? (
+                <>
+                  It goes to <strong>first position on the bookshelf</strong>, and every other issue
+                  shifts one place right.
+                </>
+              ) : (
+                <>
+                  It sits at position {highest - issue.issue_number + 1} on the shelf — issue{" "}
+                  {highest} is higher-numbered, so that one stays first.
+                </>
+              )}
             </p>
+            <p style={{ margin: "0 0 10px" }}>
+              {going > 0 ? (
+                <>
+                  {/* one expression, not text split across lines: JSX drops the
+                      whitespace around a newline entirely, which silently glues
+                      "pieces" to "become" */}
+                  <strong>{going}</strong>
+                  {`${going === 1 ? " piece becomes" : " pieces become"} readable, and any that aren’t front matter appear on the drawer straight away.`}
+                </>
+              ) : (
+                <>The issue has no publishable pieces yet, so the shelf entry will open empty.</>
+              )}
+            </p>
+            {!issue.cover_url && (
+              <p className={ui.error} style={{ margin: "12px 0 0" }}>
+                This issue has no cover yet. Add one first — the bookshelf has nothing to show
+                without it.
+              </p>
+            )}
+          </div>
+
+          {drafts > 0 && (
+            <label className={ui.checkRow} style={{ marginBottom: 18 }}>
+              <input
+                type="checkbox"
+                checked={withPieces}
+                onChange={(e) => setWithPieces(e.target.checked)}
+              />
+              <span className={ui.checkText}>
+                Also publish the {drafts}{drafts === 1 ? " piece" : " pieces"} still marked draft
+                <br />
+                <span className={ui.hint}>
+                  {live === 0
+                    ? "Leave this off and the issue goes on the shelf empty — every piece in it is still a draft."
+                    : `Leave this off to put the issue on the shelf with only the ${live} finished ${live === 1 ? "piece" : "pieces"}.`}
+                </span>
+              </span>
+            </label>
           )}
+
+          {error && <p className={ui.error}>{error}</p>}
         </div>
 
-        {drafts > 0 && (
-          <label className={ui.checkRow} style={{ marginBottom: 18 }}>
-            <input
-              type="checkbox"
-              checked={withPieces}
-              onChange={(e) => setWithPieces(e.target.checked)}
-            />
-            <span className={ui.checkText}>
-              Also publish the {drafts}{drafts === 1 ? " piece" : " pieces"} still marked draft
-              <br />
-              <span className={ui.hint}>
-                {live === 0
-                  ? "Leave this off and the issue goes on the shelf empty — every piece in it is still a draft."
-                  : `Leave this off to put the issue on the shelf with only the ${live} finished ${live === 1 ? "piece" : "pieces"}.`}
-              </span>
-            </span>
-          </label>
-        )}
-
-        {error && <p className={ui.error}>{error}</p>}
-
-        <div className={ui.modalActions} style={{ marginTop: 18 }}>
+        <div className={ui.modalActions}>
           <button type="button" className={ui.btn} onClick={onCancel} disabled={busy}>
             Not yet
           </button>

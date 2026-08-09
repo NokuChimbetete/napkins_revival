@@ -65,35 +65,37 @@ function Dialog({ issueId, categories, onClose }: Props) {
   return (
     <div className={ui.scrim} onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div className={ui.modal} style={{ maxWidth: "38rem" }} role="dialog" aria-modal="true">
-        <h2 className={ui.modalTitle}>Add a piece</h2>
-        <p className={ui.modalBody} style={{ marginBottom: 22 }}>
-          Who wrote it and what it is. The writing comes next.
-        </p>
+        <div className={ui.modalScroll}>
+          <h2 className={ui.modalTitle}>Add a piece</h2>
+          <p className={ui.modalBody} style={{ marginBottom: 22 }}>
+            Who wrote it and what it is. The writing comes next.
+          </p>
 
-        <PieceMetaFields
-          value={meta}
-          categories={categories}
-          onChange={(patch) => setMeta((m) => ({ ...m, ...patch }))}
-        />
+          <PieceMetaFields
+            value={meta}
+            categories={categories}
+            onChange={(patch) => setMeta((m) => ({ ...m, ...patch }))}
+          />
 
-        <div className={ui.notice} style={{ marginTop: 18 }}>
-          <strong style={{ fontWeight: 500, color: "#1b1b1b" }}>Web address</strong>
-          <br />
-          <code style={{ fontSize: 12, color: slug ? "#4a4a45" : "#b9b2a4" }}>
-            {slug || "…starts once there's a title"}
-          </code>
-          <br />
-          Set once, when you create the piece, and permanent after that — it&rsquo;s baked into
-          shared links and into how this piece&rsquo;s napkin looks. Fix any spelling now.
+          <div className={ui.notice} style={{ marginTop: 18 }}>
+            <strong style={{ fontWeight: 500, color: "#1b1b1b" }}>Web address</strong>
+            <br />
+            <code style={{ fontSize: 12, color: slug ? "#4a4a45" : "#b9b2a4" }}>
+              {slug || "…starts once there's a title"}
+            </code>
+            <br />
+            Set once, when you create the piece, and permanent after that — it&rsquo;s baked into
+            shared links and into how this piece&rsquo;s napkin looks. Fix any spelling now.
+          </div>
+
+          {error && (
+            <p className={ui.error} style={{ margin: "14px 0 0" }}>
+              {error}
+            </p>
+          )}
         </div>
 
-        {error && (
-          <p className={ui.error} style={{ marginTop: 14 }}>
-            {error}
-          </p>
-        )}
-
-        <div className={ui.modalActions} style={{ marginTop: 20 }}>
+        <div className={ui.modalActions}>
           <button type="button" className={ui.btn} onClick={onClose} disabled={pending}>
             Cancel
           </button>

@@ -318,6 +318,22 @@
 
 /* ---- modal ---- */
 
+/* ---- modal -----------------------------------------------------------------
+   A dialog is capped to the window and scrolls INSIDE itself, with its buttons
+   pinned below that scroll.
+
+   The obvious version of this — a fixed, flex-centred scrim with an
+   unconstrained child — breaks the moment the content is taller than the
+   window: the overflow goes off the top AND the bottom, and because the scrim
+   is fixed there is nothing to scroll. The confirm button ends up off-screen
+   with no way to reach it, and resizing the window can't rescue it. The "Add a
+   piece" form is long enough to hit this on any laptop.
+
+   `overflow-y: auto` on the scrim is the second line of defence, for a dialog
+   that somehow still exceeds its cap. It needs `margin: auto` on the child
+   rather than `align-items: center`, or the top of an overflowing child is
+   unreachable in exactly the same way. */
+
 .scrim {
   position: fixed;
   inset: 0;
@@ -325,27 +341,43 @@
   background: rgba(27, 27, 27, 0.36);
   backdrop-filter: blur(2px);
   display: flex;
-  align-items: center;
   justify-content: center;
-  padding: 30px;
+  overflow-y: auto;
+  padding: 24px;
+  overscroll-behavior: contain;
 }
 
 .modal {
   width: 100%;
   max-width: 30rem;
-  background: #ffffff;
-  border-radius: 13px;
-  padding: 26px;
-  box-shadow: 0 24px 60px -20px rgba(40, 30, 15, 0.4);
-}
-
-.modalWide {
-  max-width: 64rem;
-  max-height: calc(100vh - 60px);
+  /* dvh, not vh: vh ignores browser chrome and would let the footer sit just
+     under the bottom edge on the very laptops this is for */
+  max-height: calc(100dvh - 48px);
+  margin: auto;
   display: flex;
   flex-direction: column;
-  padding: 0;
+  background: #ffffff;
+  border-radius: 13px;
+  box-shadow: 0 24px 60px -20px rgba(40, 30, 15, 0.4);
+  /* padding lives on the parts, so the pinned footer can span the full width */
   overflow: hidden;
+}
+
+/* For a dialog whose <form> has to wrap both the scroll body and the footer,
+   so the submit button stays inside the form. */
+.modalForm {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Everything above the buttons. This is the part that scrolls. */
+.modalScroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 26px 26px 4px;
 }
 
 .modalTitle {
@@ -362,8 +394,13 @@
   margin: 0 0 20px;
 }
 
+/* Pinned, so "Create" is reachable however long the form gets. */
 .modalActions {
+  flex: 0 0 auto;
   display: flex;
   justify-content: flex-end;
   gap: 10px;
+  padding: 15px 26px 18px;
+  border-top: 1px solid #ece8df;
+  background: #ffffff;
 }
