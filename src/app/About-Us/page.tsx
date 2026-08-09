@@ -82,15 +82,17 @@ export default function AboutUsPage() {
             sizes="(max-width: 600px) 56px, (max-width: 900px) 140px, 110px"
           />
         </Link>
-        <Link href="/About-Us" className={styles.navLink}>
-          ABOUT US
-        </Link>
-        <Link href="/#magazine" className={styles.navLink}>
-          MAGAZINE
-        </Link>
-        <Link href="/Events" className={styles.navLink}>
-          EVENTS
-        </Link>
+        <nav className={styles.nav} aria-label="Site">
+          <Link href="/About-Us" className={styles.navLink}>
+            ABOUT US
+          </Link>
+          <Link href="/#magazine" className={styles.navLink}>
+            MAGAZINE
+          </Link>
+          <Link href="/Events" className={styles.navLink}>
+            EVENTS
+          </Link>
+        </nav>
       </div>
 
       <div className={styles.row}>

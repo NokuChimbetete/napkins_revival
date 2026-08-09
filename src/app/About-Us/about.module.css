@@ -42,7 +42,11 @@
 }
 
 /* ---- nav ------------------------------------------------------------------
-   logo(1) + spacer(7) + four links at one column each = 12. */
+   The logo stays in the twelve-column row, at column 1. The links no longer
+   do: they are pinned, in the same place Submit to the Magazine and Join the
+   Team keep theirs — 46px down and 56px in from the right. The columns had
+   them at a ~132px inset, which is not that place, so they come out of the
+   grid to get there. */
 
 .navRow {
   align-items: start;
@@ -59,18 +63,26 @@
   height: auto;
 }
 
+/* Pinned, so it is reachable from anywhere on the page rather than only at
+   the top. `padding: 0` undoes the row gutter that `.row > *` would otherwise
+   hand it, which would push the links in off the 56px. */
+.nav {
+  position: fixed;
+  z-index: 4;
+  top: 46px;
+  right: 56px;
+  display: flex;
+  gap: 46px;
+  padding: 0;
+}
+
 .navLink {
-  grid-column: span 1;
   font-size: 15.552px;
   line-height: 1.2;
   letter-spacing: 0.01em;
   color: rgba(0, 0, 0, 0.85);
   text-decoration: none;
   white-space: nowrap;
-}
-
-.navLink:first-of-type {
-  grid-column: 9 / span 1;
 }
 
 .navLink:hover {
@@ -304,15 +316,6 @@
     grid-column: 1 / span 2;
   }
 
-  .navLink {
-    grid-column: span 2;
-    font-size: 15.552px;
-  }
-
-  .navLink:first-of-type {
-    grid-column: 5 / span 2;
-  }
-
   .display {
     grid-column: 2 / span 10;
     font-size: 49.2px;
@@ -372,7 +375,7 @@
     padding: 0 9px;
   }
 
-  /* the four links no longer fit beside the logo — drop them to their own line */
+  /* the links no longer fit beside the logo — drop them to their own line */
   .navRow {
     grid-template-columns: repeat(4, 1fr);
     row-gap: 4px;
@@ -384,9 +387,19 @@
     margin-bottom: 14px;
   }
 
-  .navLink,
-  .navLink:first-of-type {
-    grid-column: span 1;
+  /* Not pinned on a phone — the same call the other three pages make at their
+     own narrow breakpoint. Back in the row it re-inherits the four columns it
+     used to sit in directly, one link each, so it lands where it always did. */
+  .nav {
+    position: static;
+    grid-column: 1 / span 4;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    padding: 0;
+  }
+
+  .navLink {
     font-size: 11px;
     letter-spacing: 0.02em;
     padding: 6px 0;
