@@ -172,9 +172,16 @@
   padding-top: 8px;
 }
 
+/* Sized by the room it has, not by a fixed height.
+   At 300px tall the wordmark is 938px wide, and centred that put its right
+   edge past the smiley on anything narrower than about 1200px — 91px of
+   overlap at 1024 — which buried the button and pushed the shelf below the
+   fold. The cap keeps the old size wherever it fits (1318px and up renders
+   identically, because 938px wide is exactly 300px tall) and gives way to the
+   window below that, leaving ~50px between the artwork and the button. */
 .titleImg {
-  height: 300px;
-  width: auto;
+  width: min(938px, calc(100vw - 380px));
+  height: auto;
 }
 
 .tagline {
@@ -579,9 +586,11 @@
     width: 120px;
   }
 
-  /* the wordmark stops being 300px tall and starts tracking the viewport */
+  /* 84vw put the wordmark across 78% of the screen, which reached the smiley
+     at every width in this range. The smiley is narrower here (120px), so the
+     margin it needs is smaller than the desktop one. */
   .titleImg {
-    width: min(84vw, 814px);
+    width: min(660px, calc(100vw - 350px));
     height: auto;
   }
 
