@@ -19,21 +19,34 @@
   display: block;
 }
 
+/* Pinned to match the landing page — this stylesheet is shared by
+   /Submit-to-the-Magazine and /Join-the-Team. `top` is what `padding-top: 6px`
+   under a 40px bar used to be, so the links do not move. */
 .nav {
+  position: fixed;
+  z-index: 4;
+  top: 46px;
+  right: 56px;
   display: flex;
   gap: 46px;
-  padding-top: 6px;
 }
 
+/* The landing page's nav type, letter for letter: Special Elite at 15px with
+   2px of tracking and an orange rule on hover. These two pages had inherited
+   Cargo's 13px sans and its blue hover, which made the same three links read
+   as a different site's navigation. */
 .navLink {
-  font-size: 13px;
-  font-weight: 400;
-  letter-spacing: 1px;
-  color: rgba(0, 0, 0, 0.85);
+  font-family: var(--font-special-elite), cursive;
+  font-size: 15px;
+  letter-spacing: 2px;
+  color: #1b1b1b;
+  border-bottom: 2px solid transparent;
+  padding-bottom: 2px;
 }
 
 .navLink:hover {
-  color: #0071ad;
+  color: #b4470f;
+  border-bottom-color: #e2622b;
 }
 
 .content {
@@ -154,6 +167,8 @@
   }
 
   .nav {
+    top: 34px;
+    right: 28px;
     gap: 22px;
     flex-wrap: wrap;
     justify-content: flex-end;
@@ -170,16 +185,19 @@
     gap: 16px;
   }
 
-  /* tight enough that the four links clear the logo on one row, which buys
-     the vertical room to pad them out to a thumb-sized target */
+  /* Unpinned on phones, exactly as the landing page does at this width: the
+     links sit beside the logo here rather than above the page, and the gap is
+     tight enough to clear it on one row — which buys the vertical room to pad
+     them out to a thumb-sized target. */
   .nav {
+    position: static;
     gap: 2px 8px;
-    padding-top: 0;
   }
 
+  /* the landing page's phone sizing, to match */
   .navLink {
-    font-size: 11px;
-    letter-spacing: 0.5px;
+    font-size: 12px;
+    letter-spacing: 1.2px;
     padding: 14px 3px;
   }
 

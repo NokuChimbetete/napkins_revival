@@ -58,11 +58,15 @@
   padding: 36px 56px 6px;
 }
 
+/* Pinned, so it is reachable from anywhere on the page rather than only at
+   the top. It therefore travels over the vintage strip, the wordmark, the
+   issue covers and the collage, carrying no backdrop of its own. */
 .nav {
-  position: absolute;
-  /* above .titleWrap: the wordmark PNG is transparent where these links show
-     through, so at an equal z-index it stayed visible but ate every click */
-  z-index: 3;
+  position: fixed;
+  /* above .titleWrap: the wordmark is transparent where these links show
+     through, so at an equal z-index it stayed visible but ate every click.
+     Above the collage too, which it now passes over. */
+  z-index: 4;
   top: 38px;
   right: 56px;
   display: flex;
@@ -699,6 +703,9 @@
     max-width: 19em;
   }
 
+  /* On a phone the nav is not pinned at all — it drops back into the flow
+     underneath the wordmark, where it is already at the top of the scroll and
+     a bar floating over a 375px-wide screen would cost more than it gives. */
   .nav {
     order: 3;
     position: static;
