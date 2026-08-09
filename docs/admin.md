@@ -266,6 +266,49 @@ Empty caption slots were skipped too: fifteen figures have never had a caption
 written, and marking one would wrap a lone `<br>` in a span — changing the
 stored HTML of six published pieces so a reader sees precisely nothing.
 
+## Adding a magazine PDF to an issue
+
+```bash
+node scripts/import-issue-pdf.mjs <pdf> <issue-number> --pdf-url "<link to the original>"
+```
+
+Renders every page to a 1400px WebP, uploads them to
+`piece-images/<n>/pages/`, and sets `issues.page_images` — which is what makes
+the "Read as PDF" pill appear and drives the spread viewer at `/issues/<n>/pdf`.
+`--pdf-url` sets what "Download PDF" points at. Add `--dry` to measure first.
+
+**Do not upload the magazine PDFs themselves.** The originals of these issues
+run from 39 MB to 298 MB, and the Supabase free tier caps a single file at
+50 MB and the *whole project* at 5 GB of egress a month. One reader downloading
+Fall 2023 would spend 6% of the month's bandwidth for the entire site — covers,
+artwork, everything — and the shelf would start failing to load.
+
+So the arrangement is deliberately split:
+
+| | where | why |
+| --- | --- | --- |
+| reading | WebP pages, on Supabase | ~40–190 KB a page, and a reader who opens two pages pays for two pages |
+| the original | wherever it already lives (Google Drive today) | full quality, searchable text, costs us no storage and no egress |
+
+Rendering is **lossy and one-way**: text becomes pixels, so it stops being
+selectable, searchable and print-resolution. That is the trade for a zine that
+loads. It is also why `--pdf-url` matters — the untouched original must stay one
+click away, and `PdfSpreadViewer` opens an off-site one in a new tab rather than
+promising a `download` that browsers ignore cross-origin.
+
+Measured on the four imported so far:
+
+| issue | original | pages | rendered | |
+| --- | --- | --- | --- | --- |
+| 1 Summer 2022 | 192.5 MB | 39 | 2.3 MB | 83× |
+| 3 Summer 2023 | 159.2 MB | 34 | 1.3 MB | 122× |
+| 4 Fall 2023 | 284.1 MB | 33 | 4.9 MB | 58× |
+| 5 Spring 2024 | 38.9 MB | 28 | 5.1 MB | 7.6× |
+
+Re-running for an issue that already has pages overwrites them and deletes any
+left over from a longer previous render, so a shorter re-import can't leave
+phantom pages on the end.
+
 ## Adding an editor
 
 Insert their email into `admin_whitelist` in the Supabase SQL editor:
@@ -292,4 +335,5 @@ Without it the magic link lands nowhere.
 | `node scripts/verify-rls.mjs` | Non-editors are refused by Postgres |
 | `node scripts/migrate-blocks.mjs --dry` | What a re-migration would rewrite |
 | `node scripts/migrate-captions.mjs --dry` | Which figure captions would get caption styling |
+| `node scripts/import-issue-pdf.mjs <pdf> <n> --dry` | What a magazine PDF would render to, without uploading |
 | `node scripts/napkin-snapshot.mjs capture\|diff <file>` | No napkin moved |
