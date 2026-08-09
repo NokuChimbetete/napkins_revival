@@ -12,6 +12,41 @@ type Props = {
   hasWeb: boolean;
 };
 
+/**
+ * "Download PDF" points at the full-quality original, which for most issues is
+ * hosted off-site — the files run to 298MB and the whole point of the page
+ * images beside it is that nobody has to pay that to read.
+ *
+ * Two things follow from the link being cross-origin. The `download` attribute
+ * is ignored by every browser unless the file is same-origin, so promising a
+ * download and then navigating away is worse than not promising one. And
+ * leaving the reader entirely to fetch a 300MB file loses their place, so an
+ * off-site original opens in its own tab.
+ */
+function DownloadLink({ href }: { href: string }) {
+  const offSite = /^https?:\/\//i.test(href) && !href.includes(".supabase.co/");
+
+  if (offSite) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={styles.barLink}
+        title="The original, full quality — opens in a new tab"
+      >
+        Download PDF ↗
+      </a>
+    );
+  }
+
+  return (
+    <a href={href} download className={styles.barLink}>
+      Download PDF
+    </a>
+  );
+}
+
 export function PdfSpreadViewer({ pages, issueNumber, issueTitle, pdfHref, hasWeb }: Props) {
   const [singlePage, setSinglePage] = useState(false);
   const [spreadIndex, setSpreadIndex] = useState(0);
@@ -81,11 +116,7 @@ export function PdfSpreadViewer({ pages, issueNumber, issueTitle, pdfHref, hasWe
               Read on the web
             </Link>
           )}
-          {pdfHref && (
-            <a href={pdfHref} download className={styles.barLink}>
-              Download PDF
-            </a>
-          )}
+          {pdfHref && <DownloadLink href={pdfHref} />}
         </span>
       </div>
 
