@@ -26,6 +26,11 @@ const BARE = /^(?:br|em|strong|h[1-6]|blockquote|ul|ol|li|p)$/i;
 const DIV_CLASS =
   /^(?:align-left|align-center|align-right|gallery|row|col|embed embed-video|embed embed-audio)$/;
 
+/** The only classes a <span> may carry, and the only reason <span> is allowed
+ *  at all: caption styling and an explicit reading size. Matched whole, in the
+ *  canonical order render.ts writes them, so nothing else can ride along. */
+const SPAN_CLASS = /^(?:caption|caption size-(?:sm|lg|xl)|size-(?:sm|lg|xl))$/;
+
 const IFRAME_HOST =
   /^https:\/\/(?:www\.youtube\.com\/embed\/|open\.spotify\.com\/embed\/|w\.soundcloud\.com\/player\/)/i;
 
@@ -55,9 +60,18 @@ function clean(tag: string): string {
   const name = rawName.toLowerCase();
 
   if (BARE.test(name)) return `<${closing}${name}>`;
-  if (closing) return name === "div" || name === "a" || name === "video" || name === "iframe" ? `</${name}>` : "";
+  if (closing)
+    return ["div", "a", "video", "iframe", "span"].includes(name) ? `</${name}>` : "";
 
   switch (name) {
+    case "span": {
+      // A span with no recognised class is dropped and its text kept — the
+      // element only exists to carry caption/size, so there is nothing else it
+      // could legitimately be doing.
+      const cls = attrOf(tag, "class");
+      return cls && SPAN_CLASS.test(cls) ? `<span class="${cls}">` : "";
+    }
+
     case "div": {
       const cls = attrOf(tag, "class");
       if (!cls) return "<div>";

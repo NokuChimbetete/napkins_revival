@@ -1,4 +1,4 @@
-import { blockId, type Block, type Wrap } from "@/lib/blocks/types";
+import { blockId, type Block, type TextSize, type Wrap } from "@/lib/blocks/types";
 
 /**
  * Making new blocks, and the small edits the palette and block bar perform.
@@ -52,7 +52,9 @@ export function makeBlock(kind: BlockKind): Block {
         wrap: "center",
         blocks: [
           { id: blockId(), type: "image", src: "", alt: "" },
-          { id: blockId(), type: "text", text: "\nCaption" },
+          // caption: true is what makes it read as a caption rather than as
+          // another paragraph — two points down from body copy, and italic
+          { id: blockId(), type: "text", text: "\nCaption", caption: true },
         ],
       };
     case "gallery":
@@ -151,6 +153,16 @@ export const IMAGE_WRAP_OPTIONS: { value: Wrap | undefined; label: string }[] = 
 /** Sizes offered as buttons, because "about a third" is the actual thought an
  *  editor has. The slider beside them covers everything in between. */
 export const SIZE_PRESETS = [25, 40, 60, 80, 100];
+
+/** Reading sizes as named steps, not free pixels. Nine slightly different body
+ *  sizes across an issue reads as a mistake; four deliberate ones reads as
+ *  typography. `undefined` is the reader's own 18px. */
+export const TEXT_SIZE_OPTIONS: { value: TextSize | undefined; label: string }[] = [
+  { value: "sm", label: "Small" },
+  { value: undefined, label: "Normal" },
+  { value: "lg", label: "Large" },
+  { value: "xl", label: "Huge" },
+];
 
 /**
  * Turn a pasted link into the embed URL the reader's iframe needs.

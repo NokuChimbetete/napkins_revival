@@ -13,7 +13,7 @@
  * preview and production cannot drift.
  */
 
-import type { Block, Doc, EmbedProvider, ImageRef, Wrap } from "./types";
+import type { Block, Doc, EmbedProvider, ImageRef, TextSize, Wrap } from "./types";
 import { normalizeImg, textToInline } from "./inline";
 
 const WRAP_OPEN: Record<Wrap, string> = {
@@ -25,6 +25,23 @@ const WRAP_OPEN: Record<Wrap, string> = {
 
 const wrapped = (inner: string, wrap: Wrap | undefined) =>
   wrap ? `${WRAP_OPEN[wrap]}${inner}</div>` : inner;
+
+/**
+ * Caption and size ride on a <span> around the whole text run, not on the
+ * wrapper div — a text block often has no wrapper, and inventing one to hang a
+ * class off would change the block-level layout of everything that has been
+ * published so far. A span changes type and nothing else.
+ *
+ * Class order is fixed (caption, then size) so the string is canonical and the
+ * round-trip stays byte-exact.
+ */
+export const styleClass = (b: { caption?: true; size?: TextSize }): string =>
+  [b.caption ? "caption" : "", b.size ? `size-${b.size}` : ""].filter(Boolean).join(" ");
+
+const styled = (inner: string, b: { caption?: true; size?: TextSize }) => {
+  const cls = styleClass(b);
+  return cls ? `<span class="${cls}">${inner}</span>` : inner;
+};
 
 /** Only the two players the reader styles differently: a playlist is a player,
  *  not a 16:9 video frame (see .embed-audio in reader.module.css). */
@@ -52,7 +69,7 @@ const img = (i: ImageRef & { scale?: number }) =>
 export function renderBlock(b: Block): string {
   switch (b.type) {
     case "text":
-      return wrapped(textToInline(b.text), b.wrap);
+      return wrapped(styled(textToInline(b.text), b), b.wrap);
 
     case "image":
       return wrapped(img(b), b.wrap);

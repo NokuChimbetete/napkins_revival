@@ -18,6 +18,7 @@ import {
   type Doc,
   type EmbedProvider,
   type ImageRef,
+  type TextSize,
   type Wrap,
 } from "./types";
 import { attr, imageScale, inlineToText } from "./inline";
@@ -97,7 +98,73 @@ const wrapOf = (cls: string): Wrap | null =>
  *  <em>; splitting there would break the emphasis across two blocks and change
  *  the markup, so those images stay inside the text block, where <img> is an
  *  allowed inline tag. */
+/** The classes render.ts puts on a styling <span>. Anything else is not one. */
+const STYLE_CLASS = /^(?:caption)?\s*(?:size-(sm|lg|xl))?$/;
+
+/**
+ * Pull out the top-level styling spans render.ts emits, so `caption` and `size`
+ * come back as properties rather than as literal markup inside the text.
+ *
+ * Depth-aware: a <span> nested inside <em> is not a block wrapper, and an
+ * editor who literally typed "<span>" had it escaped by textToInline long
+ * before this, so there is no ambiguity about which spans are ours.
+ */
+function splitStyledSpans(flow: string): { inner: string; caption?: true; size?: TextSize }[] {
+  const OPEN = /<span class="([^"]*)">/gi;
+  const parts: { inner: string; caption?: true; size?: TextSize }[] = [];
+  let cursor = 0;
+  let m: RegExpExecArray | null;
+  OPEN.lastIndex = 0;
+
+  while ((m = OPEN.exec(flow))) {
+    const cls = m[1].trim();
+    if (!STYLE_CLASS.test(cls) || !cls) continue;
+
+    // find this span's own closer, counting nested spans
+    let depth = 1;
+    const SCAN = /<span\b[^>]*>|<\/span>/gi;
+    SCAN.lastIndex = OPEN.lastIndex;
+    let close = -1;
+    let s: RegExpExecArray | null;
+    while ((s = SCAN.exec(flow))) {
+      depth += s[0] === "</span>" ? -1 : 1;
+      if (depth === 0) {
+        close = s.index;
+        break;
+      }
+    }
+    if (close < 0) continue; // unbalanced: leave it in the text
+
+    if (m.index > cursor) parts.push({ inner: flow.slice(cursor, m.index) });
+    parts.push({
+      inner: flow.slice(OPEN.lastIndex, close),
+      ...(/caption/.test(cls) ? { caption: true as const } : {}),
+      ...(cls.match(/size-(sm|lg|xl)/) ? { size: cls.match(/size-(sm|lg|xl)/)![1] as TextSize } : {}),
+    });
+    cursor = close + "</span>".length;
+    OPEN.lastIndex = cursor;
+  }
+
+  if (cursor < flow.length) parts.push({ inner: flow.slice(cursor) });
+  return parts.length ? parts : [{ inner: flow }];
+}
+
 function flowToBlocks(flow: string): Block[] {
+  if (!flow) return [];
+  const parts = splitStyledSpans(flow);
+  if (parts.length > 1 || parts[0].caption || parts[0].size) {
+    return parts.flatMap((p) =>
+      plainFlowToBlocks(p.inner).map((b) =>
+        b.type === "text"
+          ? { ...b, ...(p.caption ? { caption: p.caption } : {}), ...(p.size ? { size: p.size } : {}) }
+          : b
+      )
+    );
+  }
+  return plainFlowToBlocks(flow);
+}
+
+function plainFlowToBlocks(flow: string): Block[] {
   if (!flow) return [];
   const out: Block[] = [];
   let buf = "";

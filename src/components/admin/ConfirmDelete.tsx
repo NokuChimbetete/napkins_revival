@@ -53,39 +53,45 @@ function Dialog({ name, kind, detail, busy, error, onCancel, onConfirm }: Props)
       }}
     >
       <div className={ui.modal} role="dialog" aria-modal="true" aria-label={`Delete ${name}`}>
-        <h2 className={ui.modalTitle}>Delete “{name}”?</h2>
-        <p className={ui.modalBody}>
-          {detail ?? `This ${kind} and everything in it will be gone for good. There is no undo.`}
-        </p>
-
+        {/* the form spans scroll body and pinned footer, so the submit button
+            stays inside it and Enter in the field still submits */}
         <form
+          className={ui.modalForm}
           onSubmit={(e) => {
             e.preventDefault();
             if (matches && !busy) onConfirm(typed);
           }}
         >
-          <div className={ui.field}>
-            <label className={ui.label} htmlFor="confirm-name">
-              Type <strong>{name}</strong> to confirm
-            </label>
-            <input
-              id="confirm-name"
-              ref={inputRef}
-              className={ui.input}
-              value={typed}
-              onChange={(e) => setTyped(e.target.value)}
-              autoComplete="off"
-              spellCheck={false}
-            />
+          <div className={ui.modalScroll}>
+            <h2 className={ui.modalTitle}>Delete “{name}”?</h2>
+            <p className={ui.modalBody}>
+              {detail ??
+                `This ${kind} and everything in it will be gone for good. There is no undo.`}
+            </p>
+
+            <div className={ui.field}>
+              <label className={ui.label} htmlFor="confirm-name">
+                Type <strong>{name}</strong> to confirm
+              </label>
+              <input
+                id="confirm-name"
+                ref={inputRef}
+                className={ui.input}
+                value={typed}
+                onChange={(e) => setTyped(e.target.value)}
+                autoComplete="off"
+                spellCheck={false}
+              />
+            </div>
+
+            {error && (
+              <p className={ui.error} style={{ margin: "12px 0 0" }}>
+                {error}
+              </p>
+            )}
           </div>
 
-          {error && (
-            <p className={ui.error} style={{ marginTop: 12 }}>
-              {error}
-            </p>
-          )}
-
-          <div className={ui.modalActions} style={{ marginTop: 20 }}>
+          <div className={ui.modalActions}>
             <button type="button" className={ui.btn} onClick={onCancel} disabled={busy}>
               Keep it
             </button>

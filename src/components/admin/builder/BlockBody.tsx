@@ -5,7 +5,14 @@ import type { Block, ImageBlock, ImageRef, Wrap } from "@/lib/blocks/types";
 import { blockId } from "@/lib/blocks/types";
 import { sanitizeHtml } from "@/lib/sanitize-html";
 import { piecePath, uploadImage } from "@/lib/admin/upload";
-import { IMAGE_WRAP_OPTIONS, SIZE_PRESETS, TEXT_WRAP_OPTIONS, fromEmbed, toEmbed } from "./blockOps";
+import {
+  IMAGE_WRAP_OPTIONS,
+  SIZE_PRESETS,
+  TEXT_SIZE_OPTIONS,
+  TEXT_WRAP_OPTIONS,
+  fromEmbed,
+  toEmbed,
+} from "./blockOps";
 import { BlockList, type ListProps } from "./BlockList";
 import { TextPane } from "./TextPane";
 import styles from "./builder.module.css";
@@ -32,6 +39,25 @@ export function BlockBody({
             onChange={(text) => onChange({ ...block, text })}
           />
           <WrapPicker kind="text" value={block.wrap} onChange={(wrap) => onChange({ ...block, wrap })} />
+          <div className={styles.controls}>
+            <span className={styles.miniLabel}>Size</span>
+            <Segmented
+              options={TEXT_SIZE_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+              value={block.size}
+              onChange={(size) => onChange({ ...block, size })}
+            />
+            <button
+              type="button"
+              className={`${styles.segment} ${block.caption ? styles.segmentOn : ""}`}
+              style={{ border: "1px solid #e5e0d5", borderRadius: 6 }}
+              title="Style this as the words under a picture — smaller and italic"
+              onClick={() =>
+                onChange({ ...block, ...(block.caption ? { caption: undefined } : { caption: true as const }) })
+              }
+            >
+              Caption
+            </button>
+          </div>
         </>
       );
 
