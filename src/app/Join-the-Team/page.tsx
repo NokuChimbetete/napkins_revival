@@ -17,6 +17,8 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Join the Team — Napkins",
+  description: "Roles on the Napkins editorial team, and how to join us.",
+  alternates: { canonical: "/Join-the-Team" },
 };
 
 export default function JoinTheTeamPage() {

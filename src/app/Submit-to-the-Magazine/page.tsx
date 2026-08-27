@@ -17,6 +17,9 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Submit to the Magazine — Napkins",
+  description:
+    "Send us poetry, prose, visual art or translation — submission guidelines and limits for Napkins contributors.",
+  alternates: { canonical: "/Submit-to-the-Magazine" },
 };
 
 export default function SubmitPage() {

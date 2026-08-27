@@ -20,6 +20,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "About Us — Napkins",
   description: "From Magazine to Interactive Art: The Evolution of Napkins",
+  alternates: { canonical: "/About-Us" },
 };
 
 /** The four narrative rows: illustration on the left, paragraphs on the right. */

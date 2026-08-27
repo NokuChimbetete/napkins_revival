@@ -20,6 +20,7 @@ export const metadata: Metadata = {
   title: "Events — Napkins",
   description:
     "Four interactive exhibitions: Fractal in Taipei, Honk, Please! in Hyderabad, Borde_ in Buenos Aires, and Chimera in Berlin.",
+  alternates: { canonical: "/Events" },
 };
 
 /**

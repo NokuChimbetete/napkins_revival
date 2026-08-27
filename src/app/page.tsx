@@ -11,6 +11,7 @@ import styles from "@/components/landing/landing.module.css";
 
 export const metadata: Metadata = {
   title: "Napkins — Art & Literature Zine",
+  alternates: { canonical: "/" },
 };
 
 export default async function Home() {

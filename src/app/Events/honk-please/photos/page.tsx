@@ -18,6 +18,7 @@ const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Photographs — Honk, Please! — Napkins",
   description: "Twenty-five photographs of Honk, Please! by Mona Westphal.",
+  alternates: { canonical: "/Events/honk-please/photos" },
 };
 
 /**
