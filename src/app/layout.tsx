@@ -8,6 +8,7 @@ import {
   Gochi_Hand,
   Special_Elite,
 } from "next/font/google";
+import { SITE_NAME, SITE_URL } from "@/lib/site";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -52,8 +53,30 @@ const gochiHand = Gochi_Hand({
 });
 
 export const metadata: Metadata = {
-  title: "Napkins",
+  // Absolute URLs for canonical links and card images are built from this.
+  // Without it, the relative paths below throw at build time.
+  metadataBase: new URL(SITE_URL),
+  title: SITE_NAME,
   description: "An art zine for Minervans by Minervans",
+  // No canonical here on purpose: alternates is inherited wholesale by any
+  // route that does not set its own, which would declare every page to be the
+  // homepage. Each page states its own, including "/" in page.tsx.
+  openGraph: {
+    // Deliberately no title or description. Next fills both per route from the
+    // page's own title and description when openGraph omits them, so every page
+    // gets a card naming itself instead of every card saying "Napkins".
+    // The card art comes from opengraph-image.tsx beside this file, which Next
+    // injects into any route that does not set openGraph.images itself.
+    siteName: SITE_NAME,
+    type: "website",
+    locale: "en_US",
+  },
+  twitter: {
+    // The twitter:* tags are auto-filled from openGraph, so the card shape is
+    // the only thing left to say. Despite the name, these drive link previews
+    // in Slack, iMessage and Discord too, not just X.
+    card: "summary_large_image",
+  },
   other: {
     // opt out of Dark Reader — the site is art-directed around a fixed palette
     // needs a non-empty value: Next.js drops `other` entries whose value is ""

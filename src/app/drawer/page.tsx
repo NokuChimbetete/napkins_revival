@@ -19,6 +19,10 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
       : "The Napkins Drawer — Napkins",
     description:
       "Every piece ever published in Napkins, scattered as a pile of napkins. Pick one up.",
+    // The opened piece is part of the address, not a filter on it: a deep link
+    // is its own page with its own title, so it is its own canonical. Pointing
+    // them all at bare /drawer would drop every piece out of the index.
+    alternates: { canonical: opened ? `/drawer?piece=${piece}` : "/drawer" },
   };
 }
 

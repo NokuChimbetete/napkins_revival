@@ -31,6 +31,7 @@ export async function generateMetadata({
   return {
     title: `${space.title} — Fractal — Napkins`,
     description: space.lede[0],
+    alternates: { canonical: `/Events/fractal/${space.slug}` },
   };
 }
 

@@ -18,6 +18,7 @@ const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Audio Guide — Chimera — Napkins",
   description: "Four audio guides from Chimera, with transcripts.",
+  alternates: { canonical: "/Events/chimera/audio-guide" },
 };
 
 /**
