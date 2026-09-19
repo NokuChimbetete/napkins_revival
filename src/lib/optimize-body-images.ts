@@ -5,15 +5,15 @@
  * Piece artwork is injected with dangerouslySetInnerHTML, which means it never
  * touches next/image: every reader downloads the full ~1500px original even on
  * a phone, in whatever format it was stored as. Rewriting the src/srcset here
- * gets AVIF negotiation and per-viewport sizing for free, with no change to
+ * gets WebP conversion and per-viewport sizing for free, with no change to
  * what anything looks like.
  *
  * Done in the data layer rather than at render so it is computed once, travels
  * with the JSON the napkin modal fetches, and can be cached by the HTTP layer.
  */
 
-/** Widths must come from Next's configured deviceSizes/imageSizes, or the
- *  optimizer answers 400. These are the defaults that bracket our layout. */
+/** Widths must come from deviceSizes/imageSizes in next.config, or the
+ *  optimizer answers 400. Trimming those lists means checking this one. */
 const WIDTHS = [384, 640, 828, 1080, 1200];
 
 /** Must be one of `images.qualities` in next.config — Next rejects anything

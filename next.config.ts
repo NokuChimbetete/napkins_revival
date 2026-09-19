@@ -8,10 +8,26 @@ const nextConfig: NextConfig = {
   // Update the address if the machine's LAN IP changes (`npm run dev` prints it).
   allowedDevOrigins: ["10.112.18.147", "10.112.18.*"],
   images: {
-    // Next negotiates the best format the browser accepts, in this order.
-    // AVIF is ~30–50% smaller than WebP on the collage and covers; anything
-    // that can't take it silently falls back to WebP, then the original.
-    formats: ["image/avif", "image/webp"],
+    // Vercel's free plan allows 5,000 image transformations a month, and every
+    // (image, width, format) combination is one. With ~370 images in public/
+    // plus the Supabase artwork, the defaults ran through that in September
+    // 2026 — after which un-cached images simply fail to load. Three settings
+    // keep us under it:
+    //
+    // WebP only. AVIF was ~30% smaller still, but asking for both formats
+    // made every image twice. Every current browser takes WebP.
+    formats: ["image/webp"],
+    // Keep each optimized copy for 31 days instead of the 4-hour default, so
+    // a copy is made once rather than again every few hours. Safe because
+    // admin uploads carry a ?v= cache-buster (src/lib/admin/upload.ts), and a
+    // replaced file in public/ should get a new filename anyway.
+    minimumCacheTTL: 2678400,
+    // Fewer widths means fewer distinct copies across visitors' screens.
+    // Dropped 2048/3840: only 13 images in public/ are wider than 1920, and
+    // Next never enlarges. Every width optimizeBodyImages() asks for
+    // (384–1200) must stay in one of these lists, or those images 400.
+    deviceSizes: [640, 828, 1080, 1200, 1920],
+    imageSizes: [64, 128, 256, 384],
     remotePatterns: [
       {
         protocol: "https",
