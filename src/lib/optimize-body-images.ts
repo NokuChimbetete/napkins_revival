@@ -12,6 +12,8 @@
  * with the JSON the napkin modal fetches, and can be cached by the HTTP layer.
  */
 
+import { imageResizingPaused } from "@/lib/image-resizing";
+
 /** Widths must come from deviceSizes/imageSizes in next.config, or the
  *  optimizer answers 400. Trimming those lists means checking this one. */
 const WIDTHS = [384, 640, 828, 1080, 1200];
@@ -48,7 +50,7 @@ const attr = (tag: string, name: string): string | null =>
   null;
 
 export function optimizeBodyImages(html: string | null): string | null {
-  if (!html) return html;
+  if (!html || imageResizingPaused()) return html;
 
   return html.replace(/<img\b[^>]*>/gi, (tag) => {
     const src = attr(tag, "src");

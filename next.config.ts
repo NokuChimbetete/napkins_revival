@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { imageResizingPaused } from "./src/lib/image-resizing";
 
 const nextConfig: NextConfig = {
   // Next 16 refuses cross-origin requests to dev-only resources, and a phone
@@ -8,6 +9,9 @@ const nextConfig: NextConfig = {
   // Update the address if the machine's LAN IP changes (`npm run dev` prints it).
   allowedDevOrigins: ["10.112.18.147", "10.112.18.*"],
   images: {
+    // Off until the free allowance resets — see src/lib/image-resizing.ts.
+    // Everything below still applies once it comes back on.
+    unoptimized: imageResizingPaused(),
     // Vercel's free plan allows 5,000 image transformations a month, and every
     // (image, width, format) combination is one. With ~370 images in public/
     // plus the Supabase artwork, the defaults ran through that in September
