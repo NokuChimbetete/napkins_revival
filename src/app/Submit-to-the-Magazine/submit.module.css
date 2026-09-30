@@ -141,6 +141,23 @@
   color: #0071ad;
 }
 
+/* The one call to action on /Join-the-Team: the display blue as a filled
+   button, so the application link can't be mistaken for body copy. */
+.cta {
+  display: inline-block;
+  margin: 6px 0 22px;
+  padding: 12px 22px;
+  background: #0071ad;
+  color: #ffffff;
+  font-weight: 700;
+  border-radius: 4px;
+  text-decoration: none;
+}
+
+.cta:hover {
+  background: #005a8a;
+}
+
 .instaRow {
   display: flex;
   justify-content: flex-end;
