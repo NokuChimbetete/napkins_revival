@@ -216,6 +216,22 @@
   color: #828282;
 }
 
+/* ---- napkins ancestors ----------------------------------------------------
+   The link that opens the past teams. It sits under the grid, in the same
+   column the grid starts in, so it reads as a footnote to it rather than as a
+   section of its own. The scroll itself is in
+   src/components/about/ancestors.module.css. */
+
+.ancestorsRow {
+  margin-top: 45px;
+}
+
+.ancestorsLink {
+  grid-column: 2 / span 10;
+  display: flex;
+  justify-content: center;
+}
+
 /* ---- learn more -----------------------------------------------------------
    label(2) + links(6), with the label in the original's orange. */
 

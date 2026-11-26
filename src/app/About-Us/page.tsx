@@ -3,7 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Averia_Serif_Libre, Inter } from "next/font/google";
 import Reveal from "@/components/about/Reveal";
-import { TEAM } from "@/components/about/team-data";
+import { Ancestors } from "@/components/about/Ancestors";
+import { ANCESTORS, TEAM } from "@/components/about/team-data";
 import styles from "./about.module.css";
 
 const averia = Averia_Serif_Libre({
@@ -157,6 +158,13 @@ export default function AboutUsPage() {
               <div className={styles.teamRole}>{member.role}</div>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* everyone who ran Napkins before, one click away but off the page */}
+      <div className={`${styles.row} ${styles.ancestorsRow}`}>
+        <div className={styles.ancestorsLink}>
+          <Ancestors people={ANCESTORS} />
         </div>
       </div>
 
