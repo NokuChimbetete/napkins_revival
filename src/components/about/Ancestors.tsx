@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import type { TeamMember } from "@/components/about/team-data";
-import { EDGE_TILE, Roller, ScrollDefs } from "@/components/about/scroll-art";
+import { Roller, ScrollDefs, SheetFrame, SheetShade } from "@/components/about/scroll-art";
 import styles from "./ancestors.module.css";
 
 /**
@@ -61,9 +61,15 @@ export function Ancestors({ people }: { people: TeamMember[] }) {
             <Roller />
 
             <div className={styles.sheet}>
-              {/* the torn edges, tiled down whatever height the list needs */}
-              <span className={styles.edgeLeft} style={{ backgroundImage: EDGE_TILE }} aria-hidden />
-              <span className={styles.edgeRight} style={{ backgroundImage: EDGE_TILE }} aria-hidden />
+              {/* the parchment itself: one shape, stretched to whatever height
+                  the list needs, with its shading pinned at both rollers */}
+              <SheetFrame />
+              <div className={styles.shadeTop}>
+                <SheetShade />
+              </div>
+              <div className={styles.shadeBottom}>
+                <SheetShade flip />
+              </div>
 
               <button
                 type="button"
@@ -76,9 +82,6 @@ export function Ancestors({ people }: { people: TeamMember[] }) {
 
               <div className={styles.sheetInner}>
                 <h2 className={styles.title}>Napkins ancestors</h2>
-                <p className={styles.blurb}>
-                  The editors, directorettes and artists who made Napkins before us.
-                </p>
 
                 <div className={styles.grid}>
                   {people.map((member) => (

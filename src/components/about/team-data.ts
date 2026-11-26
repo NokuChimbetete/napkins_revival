@@ -49,8 +49,10 @@
 // as public/assets/team/sofia.jpg is written as photo: "/assets/team/sofia.jpg".
 //
 // Any shape of picture works. Tall, wide, phone screenshot — the page crops it
-// to a square from the centre, so nothing ever comes out stretched. A picture
-// about 600x600 or larger looks sharpest; smaller than that may go fuzzy.
+// to a square, so nothing ever comes out stretched. The crop is taken from the
+// TOP of the picture, which keeps faces and hair in frame; a tall photo loses
+// its bottom, not its head. A picture about 600x600 or larger looks sharpest;
+// smaller than that may go fuzzy.
 //
 // -----------------------------------------------------------------------------
 // ADDING OR REMOVING PEOPLE

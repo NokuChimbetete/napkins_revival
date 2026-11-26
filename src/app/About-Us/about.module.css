@@ -187,7 +187,8 @@
 }
 
 /* square crop, so a photo of any shape can be dropped into team-data.ts
-   without distorting */
+   without distorting. Held to the top of the picture, not the centre: a tall
+   photo centre-cropped loses the top of the head. */
 .teamPhoto {
   position: relative;
   width: 100%;
@@ -198,6 +199,7 @@
 
 .teamPhoto img {
   object-fit: cover;
+  object-position: 50% 0%;
 }
 
 .teamName {

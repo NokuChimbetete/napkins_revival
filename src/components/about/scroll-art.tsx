@@ -106,20 +106,77 @@ export function Roller({ flip = false }: { flip?: boolean }) {
 }
 
 /**
- * One torn side edge of the parchment, tiled down the height of the sheet.
+ * The parchment between the two rollers: the whole sheet as one shape, sized
+ * to whatever box it is dropped into.
  *
- * A CSS background rather than a component, because that is what lets it
- * repeat for any length of content. The tile is 40x200 and its path starts and
- * ends at the same x, so the repeats join without a visible seam. It is drawn
- * facing right; the stylesheet mirrors it for the left edge.
+ * Paper hung between two rolls does not have straight sides. It pinches in at
+ * the middle and swells back out at the ends, and the edge is nicked rather
+ * than ruled — that barrel is most of what makes this read as a scroll and
+ * not as a dialog box with decoration at the top and bottom.
+ *
+ * The curve has to survive the sheet growing, so the box is stretched rather
+ * than scaled (`preserveAspectRatio="none"`): a side that bows inward still
+ * bows inward at any height. Two things would give that away, and both are
+ * dealt with — the outline keeps its weight through `non-scaling-stroke`, and
+ * the shading is not in here at all, because a hatch pattern stretched down a
+ * tall sheet smears into stripes. <SheetShade> puts it back at a fixed height
+ * against each roller, which is where a pen would have left it anyway.
  */
-const EDGE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="200" viewBox="0 0 40 200">
-  <path d="M30 0 C 26 34, 34 42, 29 58 C 24 76, 33 84, 28 104 L 34 118 L 27 126 C 23 146, 32 156, 29 176 C 27 188, 30 194, 30 200"
-    fill="none" stroke="${INK}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-  <g stroke="${INK}" stroke-width="1.6" opacity="0.5" stroke-linecap="round">
-    <path d="M33 14 l 6 9"/><path d="M31 46 l 7 8"/><path d="M34 88 l 6 10"/>
-    <path d="M31 132 l 7 9"/><path d="M33 168 l 6 8"/>
-  </g>
-</svg>`;
+export function SheetFrame() {
+  return (
+    <svg
+      className="nk-sheet-frame"
+      viewBox="0 0 1000 600"
+      preserveAspectRatio="none"
+      aria-hidden
+      focusable="false"
+    >
+      <path
+        d={[
+          // top edge, sagging a little under the roller
+          "M64 12",
+          "C 300 30, 700 30, 936 12",
+          // right edge: out at the top, pinched at the waist, out again,
+          // with two nicks torn out of it
+          "C 912 120, 926 150, 902 238",
+          "L 912 262 L 900 286",
+          "C 922 384, 908 474, 936 588",
+          // bottom edge, bowing the other way
+          "C 700 570, 300 570, 64 588",
+          // left edge back up, mirrored
+          "C 92 474, 78 384, 100 286",
+          "L 88 262 L 98 238",
+          "C 74 150, 88 120, 64 12",
+          "Z",
+        ].join(" ")}
+        fill={PAPER}
+        stroke={INK}
+        strokeWidth="4"
+        strokeLinejoin="round"
+        vectorEffect="non-scaling-stroke"
+      />
+    </svg>
+  );
+}
 
-export const EDGE_TILE = `url("data:image/svg+xml,${encodeURIComponent(EDGE_SVG.replace(/\s+/g, " "))}")`;
+/**
+ * The hatching where the parchment meets a roller — a band of shading at a
+ * fixed height, so it never stretches with the sheet. `flip` turns it over for
+ * the foot of the scroll.
+ */
+export function SheetShade({ flip = false }: { flip?: boolean }) {
+  return (
+    <svg
+      className="nk-sheet-shade"
+      viewBox="0 0 1000 90"
+      preserveAspectRatio="none"
+      aria-hidden
+      focusable="false"
+      style={flip ? { transform: "scaleY(-1)" } : undefined}
+    >
+      {/* heaviest right under the roll, gone within a finger's width */}
+      <path d="M70 0 C 300 20, 700 20, 932 0 L 932 34 C 700 54, 300 54, 70 34 Z" fill="url(#nk-hatch)" opacity="0.5" />
+      <path d="M74 0 C 300 18, 700 18, 928 0 L 928 15 C 700 35, 300 35, 74 15 Z" fill="url(#nk-hatch)" opacity="0.75" />
+    </svg>
+  );
+}
