@@ -187,7 +187,8 @@
 }
 
 /* square crop, so a photo of any shape can be dropped into team-data.ts
-   without distorting */
+   without distorting. Held to the top of the picture, not the centre: a tall
+   photo centre-cropped loses the top of the head. */
 .teamPhoto {
   position: relative;
   width: 100%;
@@ -198,6 +199,7 @@
 
 .teamPhoto img {
   object-fit: cover;
+  object-position: 50% 0%;
 }
 
 .teamName {
@@ -214,6 +216,22 @@
   letter-spacing: 0.01em;
   text-align: center;
   color: #828282;
+}
+
+/* ---- napkins ancestors ----------------------------------------------------
+   The link that opens the past teams. It sits under the grid, in the same
+   column the grid starts in, so it reads as a footnote to it rather than as a
+   section of its own. The scroll itself is in
+   src/components/about/ancestors.module.css. */
+
+.ancestorsRow {
+  margin-top: 45px;
+}
+
+.ancestorsLink {
+  grid-column: 2 / span 10;
+  display: flex;
+  justify-content: center;
 }
 
 /* ---- learn more -----------------------------------------------------------

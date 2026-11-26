@@ -2,9 +2,15 @@
 // THE TEAM ROSTER — this is the only file you need to edit.
 // =============================================================================
 //
-// Everything the "Meet the Team" section shows on /About-Us comes from the
-// TEAM list below. The page reads this list and nothing else: there is no
-// second copy of these names anywhere, and no row counts to keep in sync.
+// There are two lists in this file:
+//
+//   TEAM       the people running Napkins now. They appear under "Meet the
+//              Team" on /About-Us.
+//   ANCESTORS  everyone who ran it before. They appear in the "Napkins
+//              ancestors" scroll that opens when you click the link under the
+//              team.
+//
+// Both lists work exactly the same way, so everything below applies to each.
 //
 // -----------------------------------------------------------------------------
 // TO CHANGE A PERSON
@@ -23,6 +29,13 @@
 // Keep the commas and the quote marks exactly where they are.
 //
 // -----------------------------------------------------------------------------
+// WHEN SOMEONE'S TERM ENDS
+// -----------------------------------------------------------------------------
+// Cut their whole line out of TEAM and paste it into ANCESTORS. That is the
+// entire handover: nothing else needs changing, and their photo is already in
+// the right folder. New people get a new line in TEAM the same way.
+//
+// -----------------------------------------------------------------------------
 // TO ADD A NEW PHOTO
 // -----------------------------------------------------------------------------
 // Put the image file in this folder:
@@ -36,15 +49,17 @@
 // as public/assets/team/sofia.jpg is written as photo: "/assets/team/sofia.jpg".
 //
 // Any shape of picture works. Tall, wide, phone screenshot — the page crops it
-// to a square from the centre, so nothing ever comes out stretched. A picture
-// about 600x600 or larger looks sharpest; smaller than that may go fuzzy.
+// to a square, so nothing ever comes out stretched. The crop is taken from the
+// TOP of the picture, which keeps faces and hair in frame; a tall photo loses
+// its bottom, not its head. A picture about 600x600 or larger looks sharpest;
+// smaller than that may go fuzzy.
 //
 // -----------------------------------------------------------------------------
 // ADDING OR REMOVING PEOPLE
 // -----------------------------------------------------------------------------
 // Add a person by copying any line and changing it. Remove one by deleting its
-// whole line. You do not have to keep the number at 15, and you do not have to
-// balance the rows.
+// whole line. Neither list has a fixed length, and you do not have to balance
+// the rows.
 //
 // The page puts five people on a row and starts a new row by itself. So a 16th
 // person simply begins a fourth row on the left, and that row stays left-
@@ -52,8 +67,8 @@
 // someone out and the people after them shift back to close the gap. Four on a
 // row, or seven people in total, or one, all lay out correctly.
 //
-// The order below is the order they appear on the page, left to right, top to
-// bottom. Move a line to move that person.
+// The order below is the order they appear, left to right, top to bottom. Move
+// a line to move that person.
 //
 // (This mirrors how src/components/landing/collage-data.ts feeds the collage on
 // the landing page.)
@@ -68,7 +83,23 @@ export type TeamMember = {
   photo: string;
 };
 
+/** Running Napkins now — shown under "Meet the Team". */
 export const TEAM: TeamMember[] = [
+  // --- row 1 ---------------------------------------------------------------
+  { name: "Divya", pronouns: "she/her", role: "Editor-in-Chief", photo: "/assets/team/divya.jpg" },
+  { name: "Lorena", pronouns: "she/her", role: "Editor-in-Chief", photo: "/assets/team/lorena.jpg" },
+  { name: "Molly", pronouns: "she/her", role: "Literary Editor", photo: "/assets/team/molly.jpg" },
+  { name: "Sarrie", pronouns: "they/any", role: "Literary Editor", photo: "/assets/team/sarrie.jpg" },
+  { name: "Haya", pronouns: "she/her", role: "Literary Editor", photo: "/assets/team/haya.jpg" },
+
+  // --- row 2 ---------------------------------------------------------------
+  { name: "Noku", pronouns: "he/him", role: "Literary Editor | Web design", photo: "/assets/team/noku.jpg" },
+  { name: "Tiago", pronouns: "he/him", role: "Art Editor", photo: "/assets/team/tiago.jpg" },
+  { name: "Samantha", pronouns: "she/her", role: "Art Editor", photo: "/assets/team/samantha.jpg" },
+];
+
+/** Ran Napkins before — shown in the "Napkins ancestors" scroll. */
+export const ANCESTORS: TeamMember[] = [
   // --- row 1 ---------------------------------------------------------------
   { name: "Zhi Zhi", pronouns: "she/her", role: "Directorette", photo: "/assets/team/zhi-zhi.jpg" },
   { name: "Daria", pronouns: "she/her", role: "Editor-in-Chief", photo: "/assets/team/daria.jpg" },

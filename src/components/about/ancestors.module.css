@@ -1,0 +1,255 @@
+/* "Napkins ancestors" — the scroll that opens from under the team grid.
+ *
+ * The scroll is three stacked pieces: a roller, the parchment sheet, a flipped
+ * roller. Only the sheet grows, so the rollers keep their drawn proportions
+ * however long the list of ancestors gets. Ink and paper match
+ * src/components/about/scroll-art.tsx, which keeps its own copy of the two
+ * colours for the SVG. */
+
+.openLink {
+  /* a button, dressed as the page's own links (see .learnLinks a in
+     about.module.css) so it reads as part of the text, not as a control */
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.85);
+  cursor: pointer;
+}
+
+.openLink:hover {
+  color: #0071ad;
+}
+
+/* ---- the dialog ---------------------------------------------------------- */
+
+.modal {
+  /* narrower than a normal dialog: a scroll that is much wider than it is
+     tall stops looking like a scroll */
+  width: min(920px, 94vw);
+  max-width: none;
+  max-height: 92vh;
+  margin: auto;
+  padding: 0;
+  border: 0;
+  background: none; /* the scroll is the surface; no box behind it */
+  overflow: visible;
+  /* flex, so the scroll inherits the dialog's height cap and the lower roller
+     cannot be pushed off the bottom of the screen by a long list */
+  display: flex;
+}
+
+.modal:not([open]) {
+  display: none;
+}
+
+.modal::backdrop {
+  background: rgba(20, 22, 60, 0.55);
+}
+
+.scroll {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+  /* the drop shadow of a sheet lying on the backdrop */
+  filter: drop-shadow(0 18px 34px rgba(10, 12, 40, 0.35));
+}
+
+/* Both rollers are one drawing, the lower one flipped. The aspect ratio is the
+   SVG's own, so the drawing is never squashed; it is the parchment between
+   them that absorbs a longer list. */
+.scroll :global(.nk-roller) {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1000 / 120;
+  height: auto;
+  flex: none;
+}
+
+/* ---- the parchment ------------------------------------------------------- */
+
+.sheet {
+  position: relative;
+  /* pulled under the rollers so the paper looks like it comes out from
+     beneath them rather than butting against them */
+  margin: -16px 0;
+  min-height: 0; /* lets the inner area scroll inside a flex column */
+  display: flex;
+  /* no background: the parchment is the drawn shape below, which is barrelled
+     at the sides — a rectangle behind it would show at the waist */
+}
+
+/* the drawn sheet, stretched over whatever height the list needs */
+.sheet :global(.nk-sheet-frame) {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.shadeTop,
+.shadeBottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 44px;
+  pointer-events: none;
+}
+
+.shadeTop {
+  top: 0;
+}
+
+.shadeBottom {
+  bottom: 0;
+}
+
+.shadeTop :global(.nk-sheet-shade),
+.shadeBottom :global(.nk-sheet-shade) {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.sheetInner {
+  position: relative; /* above the drawn sheet */
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* the browser's own scrollbar is a grey slab against the parchment */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(43, 50, 135, 0.35) transparent;
+  /* the side padding clears the waist of the barrel, which pinches furthest
+     in at half height */
+  padding: 34px clamp(46px, 7vw, 86px) 40px;
+}
+
+.close {
+  position: absolute;
+  top: 6px;
+  right: clamp(42px, 6vw, 78px);
+  z-index: 1;
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0 4px;
+  font-size: 34px;
+  line-height: 1;
+  color: #2b3287;
+  cursor: pointer;
+}
+
+.close:hover {
+  color: #ff5900;
+}
+
+/* ---- contents ------------------------------------------------------------ */
+
+.title {
+  /* the inline padding keeps the heading clear of the close button, which
+     sits over this corner of the sheet */
+  margin: 0 0 4px;
+  padding: 0 44px;
+  font-family: var(--font-averia), Georgia, serif;
+  font-size: clamp(30px, 4vw, 46px);
+  font-weight: 400;
+  line-height: 1.1;
+  text-align: center;
+  color: #2b3287;
+}
+
+/* the gloss under the heading, in the same ink but quieter */
+.subtitle {
+  margin: 0 0 26px;
+  padding: 0 44px;
+  font-family: var(--font-inter), Helvetica, Arial, sans-serif;
+  font-size: clamp(13px, 1.3vw, 16px);
+  line-height: 1.3;
+  text-align: center;
+  color: rgba(43, 50, 135, 0.7);
+}
+
+.grid {
+  display: grid;
+  /* four across, not five: inside the barrel there is less width than a page
+     row has, and five columns wrap the longer names onto two lines */
+  grid-template-columns: repeat(4, 1fr);
+  column-gap: clamp(14px, 2vw, 26px);
+  row-gap: clamp(20px, 2.6vw, 34px);
+}
+
+.cell {
+  display: flex;
+  flex-direction: column;
+}
+
+/* square crop, held to the top of the picture — same rule the page grid uses,
+   so a photo can be moved between the two lists without reframing. Anchoring
+   to the top rather than the centre is what keeps heads of hair in frame on a
+   tall photo. */
+.photo {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  margin-bottom: 9px;
+}
+
+.photo img {
+  object-fit: cover;
+  object-position: 50% 0%;
+}
+
+.name,
+.role {
+  font-family: var(--font-inter), Helvetica, Arial, sans-serif;
+  font-size: clamp(12px, 1.25vw, 16px);
+  line-height: 1.2;
+  text-align: center;
+}
+
+.name {
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.role {
+  color: #828282;
+}
+
+/* ---- responsive ---------------------------------------------------------- */
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .modal {
+    width: 96vw;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .sheetInner {
+    /* wider than it looks necessary: the barrel pinches in at half height and
+       a photo sitting at 34px crosses the drawn edge there */
+    padding: 22px 46px 28px;
+  }
+
+  .title,
+  .subtitle {
+    padding: 0 30px;
+  }
+
+  .close {
+    right: 24px;
+  }
+}
