@@ -25,20 +25,22 @@
 
 /* ---- the dialog ---------------------------------------------------------- */
 
+/* The dialog is the whole screen, and the scroll is centred inside it. Sizing
+   the dialog to the scroll instead would leave only the few pixels either side
+   of it to tap to dismiss — unusable on a phone. Everything in here that is
+   not the scroll closes it. */
 .modal {
-  /* narrower than a normal dialog: a scroll that is much wider than it is
-     tall stops looking like a scroll */
-  width: min(920px, 94vw);
-  max-width: none;
-  max-height: 92vh;
-  margin: auto;
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  max-height: 100%;
+  margin: 0;
   padding: 0;
   border: 0;
-  background: none; /* the scroll is the surface; no box behind it */
-  overflow: visible;
-  /* flex, so the scroll inherits the dialog's height cap and the lower roller
-     cannot be pushed off the bottom of the screen by a long list */
+  background: none; /* the ::backdrop shows through */
   display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .modal:not([open]) {
@@ -52,7 +54,12 @@
 .scroll {
   display: flex;
   flex-direction: column;
-  width: 100%;
+  /* narrower than a normal dialog: a scroll that is much wider than it is
+     tall stops looking like a scroll */
+  width: min(920px, 92vw);
+  /* short of the full height on purpose, so there is always a band above and
+     below the scroll to tap */
+  max-height: 88%;
   min-height: 0;
   /* the drop shadow of a sheet lying on the backdrop */
   filter: drop-shadow(0 18px 34px rgba(10, 12, 40, 0.35));
@@ -230,10 +237,6 @@
 }
 
 @media (max-width: 600px) {
-  .modal {
-    width: 96vw;
-  }
-
   .grid {
     grid-template-columns: repeat(2, 1fr);
   }

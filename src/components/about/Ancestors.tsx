@@ -17,6 +17,7 @@ import styles from "./ancestors.module.css";
 export function Ancestors({ people }: { people: TeamMember[] }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDialogElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const dialog = ref.current;
@@ -51,11 +52,15 @@ export function Ancestors({ people }: { people: TeamMember[] }) {
           setOpen(false);
         }}
         onClick={(e) => {
-          if (e.target === ref.current) setOpen(false); // backdrop click
+          // Anywhere off the scroll closes it. The dialog covers the whole
+          // screen for this reason: sized to the scroll it left a ~10px strip
+          // to aim at, which is no use on a phone, where reaching the × in the
+          // top corner one-handed is the awkward part.
+          if (!scrollRef.current?.contains(e.target as Node)) setOpen(false);
         }}
       >
         {open && (
-          <div className={styles.scroll}>
+          <div className={styles.scroll} ref={scrollRef}>
             <ScrollDefs />
 
             <Roller />
