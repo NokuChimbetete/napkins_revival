@@ -82,6 +82,7 @@ export function Ancestors({ people }: { people: TeamMember[] }) {
 
               <div className={styles.sheetInner}>
                 <h2 className={styles.title}>Napkins ancestors</h2>
+                <p className={styles.subtitle}>(former Napkins staffers)</p>
 
                 <div className={styles.grid}>
                   {people.map((member) => (
